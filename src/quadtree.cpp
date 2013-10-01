@@ -14,8 +14,6 @@ int QuadtreeNode::comparison_index(Eigen::Vector3f vertex, Eigen::Vector3f mediu
 }
   Eigen::Vector3f QuadtreeNode::shortestDistanceTo(QuadtreeNode * tree2){
 
-    cout << leaf << " " << tree2->leaf << " " << vertex_points << " " << tree2->vertex_points << endl;
-
     if (leaf)
     {
       if (tree2->leaf)
@@ -108,7 +106,6 @@ int QuadtreeNode::comparison_index(Eigen::Vector3f vertex, Eigen::Vector3f mediu
       for (int i = 0; i < vertices.size(); ++i)
       {
         int node_index = comparison_index(vertices[i], medium);
-
         vector_lists[node_index].push_back(vertices[i]);
       } 
       for (int i = 0; i < 8; ++i)

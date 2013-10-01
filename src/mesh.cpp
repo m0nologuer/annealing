@@ -49,13 +49,14 @@ void Mesh::boundingBox(float &x, float &x_max, float &y, float &y_max, float &z,
 }
 void Mesh::rotateLessThan(float max_rotation, Eigen::Vector3f& vector_to_closest_object){
   Eigen::Vector3f midPoint = (current_center+prev_center)*0.5;
-  Eigen::Vector3f rotation_axis = (-vector_to_closest_object).cross(current_center-prev_center);
+  Eigen::Vector3f rotation_axis = (vector_to_closest_object).cross(current_center-prev_center);
   if (rotation_axis == Eigen::Vector3f(0,0,0))
     return;
   else
     rotation_axis.normalize();
   float max_distance_to_midpoint = (current_center-midPoint).norm() + boundingSphere;
   float angle = asin(min(max_rotation,max_distance_to_midpoint)/max_distance_to_midpoint)*2;
+  cout << angle << endl;
 
   rotate(Eigen::AngleAxisf(angle, rotation_axis)*Eigen::Scaling(1.0f), midPoint);
 
@@ -75,7 +76,8 @@ void Mesh::move(Eigen::Vector3f translation)
     vertexBuffer[i] += translation;
 }
 void Mesh::updateMinDistance(Mesh* secondMesh, float& distance, Eigen::Vector3f& vector_to_closest_object){
-  
+
+/*  
   Eigen::Vector3f dist = quad_tree_start->shortestDistanceTo(secondMesh->quad_tree_start);
 
   float new_distance = dist.norm();
@@ -84,8 +86,8 @@ void Mesh::updateMinDistance(Mesh* secondMesh, float& distance, Eigen::Vector3f&
     distance = new_distance;
     vector_to_closest_object = dist;
   }
+*/
 
-/*
   
   float dist_squared = distance* distance;
 
@@ -100,7 +102,7 @@ void Mesh::updateMinDistance(Mesh* secondMesh, float& distance, Eigen::Vector3f&
         vector_to_closest_object = (secondMesh->vertexBuffer[j]-vertexBuffer[i]);
       }
     }
-*/
+
 
 }
 

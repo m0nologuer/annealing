@@ -6,11 +6,12 @@
 #include "mesh.h"
 
 #define GAP 0.1f
+#define PADDING 10.0f
 #define PERCENT_TRANSLATION 0.5
 #define PERCENT_ROTATION 0.5
 #define ITERATIONS 200
 #define SPACING 0.8
-#define CUBE_SHRINKAGE_RATE 1
+#define CUBE_SHRINKAGE_RATE 0.95
 #define CONST_PI 3.14
 
 using namespace std;
@@ -24,7 +25,9 @@ int main (int argc, char *argv[]) {
     Mesh::meshFromFile(argv[i], &meshes[i-1]);
 
   //intital placement,start by stacking them on top of each other at hapharzrd rotations
-  float x_coord, y_coord, z_coord = GAP*2;
+  float x_coord, y_coord, z_coord = GAP;
+  z_coord += PADDING;
+
   for (int i = 0; i < meshCount; ++i)
   {
     Eigen::Vector3f random_direction((rand()%100)*0.01,(rand()%100)*0.01,(rand()%100)*0.01);
@@ -34,14 +37,14 @@ int main (int argc, char *argv[]) {
     meshes[i].moveToOrigin();
     float x,y,z;
     meshes[i].boundingBoxSize(x,y,z);
-    meshes[i].move(Eigen::Vector3f(GAP,GAP,z_coord));
+    meshes[i].move(Eigen::Vector3f(GAP+ PADDING,GAP+PADDING,z_coord));
 
     x_coord = max(x, x_coord);
     y_coord = max(y, x_coord);
-    z_coord += (z+GAP);
+    z_coord += (z+GAP+PADDING);
   }
 
-  float cube_size = max(x_coord+2.0f*GAP, max(y_coord+2.0f*GAP, z_coord));
+  float cube_size = max(x_coord+2.0f*(PADDING+GAP), max(y_coord+2.0f*(PADDING+GAP), z_coord+PADDING));
   int counter = 0;
 
   do
@@ -60,14 +63,24 @@ int main (int argc, char *argv[]) {
       float translation_distance = (closest_distance- GAP)*PERCENT_TRANSLATION;
       float rotation_distance = (closest_distance- GAP)*PERCENT_ROTATION;
 
-      meshes[i].move(vector_to_closest_object*translation_distance/closest_distance);
       meshes[i].rotateLessThan(rotation_distance,vector_to_closest_object);
+      meshes[i].move(vector_to_closest_object*translation_distance/closest_distance);
+
     }
     
     cout << counter << endl;
     for (int i = 0; i < meshCount; ++i)
       meshes[i].write(argv[i+1]);
+
     cube_size *= CUBE_SHRINKAGE_RATE;
+    for (int i = 0; i < meshCount; ++i)
+    {
+      float x,y,z,a,b,c;
+      meshes[i].boundingBox(a,x,b,y,c,z);
+
+      cube_size = max(max(max(cube_size,x+GAP*2),y+GAP*2),z+GAP*2);
+    }
+
     counter++;
   } while (counter < ITERATIONS);
 
