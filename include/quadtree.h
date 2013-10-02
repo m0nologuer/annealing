@@ -25,8 +25,8 @@ class QuadtreeNode
 
   QuadtreeNode();
 public:
-  QuadtreeNode(std::vector<Eigen::Vector3f> vertices);
-  Eigen::Vector3f shortestDistanceTo(QuadtreeNode * tree2);
+  QuadtreeNode(std::vector<Eigen::Vector3f> vertices, Eigen::Vector3f box_min, Eigen::Vector3f box_max);
+  void updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3f& min_vector);
   ~QuadtreeNode();
 
   static int comparison_index(Eigen::Vector3f vertex, Eigen::Vector3f medium);

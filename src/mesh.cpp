@@ -55,10 +55,11 @@ void Mesh::rotateLessThan(float max_rotation, Eigen::Vector3f& vector_to_closest
   else
     rotation_axis.normalize();
   float max_distance_to_midpoint = (current_center-midPoint).norm() + boundingSphere;
-  float angle = asin(min(max_rotation,max_distance_to_midpoint)/max_distance_to_midpoint)*2;
-  cout << angle << endl;
 
-  rotate(Eigen::AngleAxisf(angle, rotation_axis)*Eigen::Scaling(1.0f), midPoint);
+  float angle = asin(max_distance_to_midpoint/max_rotation)*2;
+
+  //if (angle == angle)
+  //  rotate(Eigen::AngleAxisf(angle, rotation_axis)*Eigen::Scaling(1.0f), midPoint);
 
 }
 void Mesh::rotate(Eigen::Matrix3f rotation, Eigen::Vector3f about)
@@ -77,17 +78,7 @@ void Mesh::move(Eigen::Vector3f translation)
 }
 void Mesh::updateMinDistance(Mesh* secondMesh, float& distance, Eigen::Vector3f& vector_to_closest_object){
 
-/*  
-  Eigen::Vector3f dist = quad_tree_start->shortestDistanceTo(secondMesh->quad_tree_start);
-
-  float new_distance = dist.norm();
-  if (new_distance < distance)
-  {
-    distance = new_distance;
-    vector_to_closest_object = dist;
-  }
-*/
-
+  // quad_tree_start->updateShortestDistanceTo(secondMesh->quad_tree_start, vector_to_closest_object);
   
   float dist_squared = distance* distance;
 
@@ -282,7 +273,7 @@ void Mesh::meshFromFile(char* filename, Mesh* out_mesh){
   for (int i = 0; i < out_mesh->vertex_count; ++i)
     vertex_list.push_back(out_mesh->vertexBuffer[i]);
 
-  out_mesh->quad_tree_start = new QuadtreeNode(vertex_list);
+ // out_mesh->quad_tree_start = new QuadtreeNode(vertex_list);
 /////////////////////////////////////////////////////////
 }
 
@@ -296,6 +287,20 @@ void Mesh::write(char* out_file){
   for (int i = 0; i < face_count; ++i)
     stream << "f " << indexBuffer[3*i] << " " << indexBuffer[3*i+1] << " "<< indexBuffer[3*i+2] << endl;
 
+/*  stream << "solid mesh" << endl;
+
+  for (int i = 0; i < face_count; ++i)
+  {
+    stream << "facet normal 0 0 0" << endl;
+    stream << "outer loop" << endl;
+      for (int j = 0; j < 3; ++j)
+        stream << "vertex " << vertexBuffer[indexBuffer[3*i+j]+1](0) << " " <<
+             vertexBuffer[indexBuffer[3*i+j]+1](1) << " "<< vertexBuffer[indexBuffer[3*i+j]+1](2) << endl;
+    stream << "end loop" << endl;
+    stream << "end facet" << endl;
+  }
+
+  stream << "endsolid mesh" << endl*/
   stream.close();
 }
 Mesh::~Mesh(){

@@ -9,7 +9,7 @@
 #define PADDING 10.0f
 #define PERCENT_TRANSLATION 0.5
 #define PERCENT_ROTATION 0.5
-#define ITERATIONS 200
+#define ITERATIONS 1
 #define SPACING 0.8
 #define CUBE_SHRINKAGE_RATE 0.95
 #define CONST_PI 3.14
@@ -44,7 +44,7 @@ int main (int argc, char *argv[]) {
     z_coord += (z+GAP+PADDING);
   }
 
-  float cube_size = max(x_coord+2.0f*(PADDING+GAP), max(y_coord+2.0f*(PADDING+GAP), z_coord+PADDING));
+  float cube_size = max(x_coord+2.0f*(PADDING+GAP), max(y_coord+2.0f*(PADDING+GAP), z_coord+PADDING*3));
   int counter = 0;
 
   do
@@ -77,8 +77,7 @@ int main (int argc, char *argv[]) {
     {
       float x,y,z,a,b,c;
       meshes[i].boundingBox(a,x,b,y,c,z);
-
-      cube_size = max(max(max(cube_size,x+GAP*2),y+GAP*2),z+GAP*2);
+      cube_size = max(max(max(cube_size,x+GAP*2 + PADDING),y+GAP*2 + PADDING),z+GAP*2 + PADDING);
     }
 
     counter++;
