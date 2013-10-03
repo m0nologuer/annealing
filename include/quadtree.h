@@ -23,8 +23,8 @@ class QuadtreeNode
   Eigen::Vector3f bounding_box_max;
   Eigen::Vector3f bounding_box_min;
 
-  QuadtreeNode();
 public:
+  QuadtreeNode();
   QuadtreeNode(std::vector<Eigen::Vector3f> vertices, Eigen::Vector3f box_min, Eigen::Vector3f box_max);
   void updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3f& min_vector);
   ~QuadtreeNode();

@@ -9,9 +9,9 @@
 #define PADDING 10.0f
 #define PERCENT_TRANSLATION 0.5
 #define PERCENT_ROTATION 0.5
-#define ITERATIONS 1
-#define SPACING 0.8
-#define CUBE_SHRINKAGE_RATE 0.95
+#define ITERATIONS 2000
+#define SPACING 5
+#define CUBE_SHRINKAGE_RATE 0.99995
 #define CONST_PI 3.14
 
 using namespace std;
@@ -57,7 +57,7 @@ int main (int argc, char *argv[]) {
 
       for (int j = 0; j < meshCount; ++j)
         if (i != j)
-          meshes[i].updateMinDistance(&meshes[j], closest_distance, vector_to_closest_object);
+          meshes[i].updateMinDistance(&meshes[j], cube_size, closest_distance, vector_to_closest_object);
 
       //rotate and translate
       float translation_distance = (closest_distance- GAP)*PERCENT_TRANSLATION;

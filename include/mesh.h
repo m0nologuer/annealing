@@ -4,7 +4,6 @@ class Mesh
 {
   Eigen::Vector3f* vertexBuffer;
   int* indexBuffer;
-  QuadtreeNode* quad_tree_start;
 
   int vertex_count;
   int face_count;
@@ -25,7 +24,8 @@ public:
   void rotate(Eigen::Matrix3f rotation, Eigen::Vector3f about);
   void move(Eigen::Vector3f translation);
 
-  void updateMinDistance(Mesh* secondMesh, float& distance, Eigen::Vector3f& vector_to_closest_object);
+  void buildQuadtree(QuadtreeNode** out_tree, float cube_size);
+  void updateMinDistance(Mesh* secondMesh, float cube_size, float& distance, Eigen::Vector3f& vector_to_closest_object);
   void rotateLessThan(float max_rotation, Eigen::Vector3f& vector_to_closest_object);
   Eigen::Vector3f smallestVectorToCube(float cube_size);
 

@@ -13,7 +13,6 @@ int QuadtreeNode::comparison_index(Eigen::Vector3f vertex, Eigen::Vector3f mediu
     return node_index;
 }
 void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3f& min_vector){
-
     if (leaf)
     {
       if (tree2->leaf)
@@ -53,9 +52,9 @@ void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3
   }
 
   QuadtreeNode::~QuadtreeNode(){
-    for (int i = 0; i < 8; ++i)
-      if (next_level[i])
-        delete[] next_level[i];
+ //  for (int i = 0; i < 8; ++i)
+  //    if (next_level[i])
+   //     delete[] next_level[i];
   }
 
   QuadtreeNode::QuadtreeNode(std::vector<Eigen::Vector3f> vertices, Eigen::Vector3f box_min, Eigen::Vector3f box_max){

@@ -10,7 +10,6 @@ Mesh::Mesh(){
   prev_center = Eigen::Vector3f(0,0,0);
   boundingSphere = 0;
 
-  quad_tree_start = NULL;;
 }
 
 void Mesh::moveToOrigin(){
@@ -58,8 +57,8 @@ void Mesh::rotateLessThan(float max_rotation, Eigen::Vector3f& vector_to_closest
 
   float angle = asin(max_distance_to_midpoint/max_rotation)*2;
 
-  //if (angle == angle)
-  //  rotate(Eigen::AngleAxisf(angle, rotation_axis)*Eigen::Scaling(1.0f), midPoint);
+  if (angle == angle)
+    rotate(Eigen::AngleAxisf(angle, rotation_axis)*Eigen::Scaling(1.0f), midPoint);
 
 }
 void Mesh::rotate(Eigen::Matrix3f rotation, Eigen::Vector3f about)
@@ -76,10 +75,25 @@ void Mesh::move(Eigen::Vector3f translation)
   for (int i = 0; i < vertex_count; ++i)
     vertexBuffer[i] += translation;
 }
-void Mesh::updateMinDistance(Mesh* secondMesh, float& distance, Eigen::Vector3f& vector_to_closest_object){
+void Mesh::buildQuadtree(QuadtreeNode** out_tree, float cube_size){
+  std::vector<Eigen::Vector3f> vertex_list;
+  for (int i = 0; i < vertex_count; ++i)
+    vertex_list.push_back(vertexBuffer[i]);
 
-  // quad_tree_start->updateShortestDistanceTo(secondMesh->quad_tree_start, vector_to_closest_object);
-  
+  *out_tree = new QuadtreeNode(vertex_list, Eigen::Vector3f(0,0,0), Eigen::Vector3f(cube_size, cube_size, cube_size));
+
+}
+
+void Mesh::updateMinDistance(Mesh* secondMesh, float cube_size, float& distance, Eigen::Vector3f& vector_to_closest_object){
+
+  QuadtreeNode* tree1; QuadtreeNode* tree2;
+  buildQuadtree(&tree1, cube_size);
+  secondMesh->buildQuadtree(&tree2, cube_size);
+
+  tree1->updateShortestDistanceTo(tree2, vector_to_closest_object);
+  delete tree1;
+  delete tree2;
+ /* 
   float dist_squared = distance* distance;
 
   for (int i = 0; i < vertex_count; ++i)
@@ -93,8 +107,7 @@ void Mesh::updateMinDistance(Mesh* secondMesh, float& distance, Eigen::Vector3f&
         vector_to_closest_object = (secondMesh->vertexBuffer[j]-vertexBuffer[i]);
       }
     }
-
-
+*/
 }
 
 void Mesh::boundingBoxSize(float &j, float &k, float &l){
@@ -269,11 +282,6 @@ void Mesh::meshFromFile(char* filename, Mesh* out_mesh){
   out_mesh->prev_center = Eigen::Vector3f(0,0,-1) + out_mesh->current_center;
   out_mesh->boundingSphere = (out_mesh->current_center-Eigen::Vector3f(x,y,z)).norm();
 
-  std::vector<Eigen::Vector3f> vertex_list;
-  for (int i = 0; i < out_mesh->vertex_count; ++i)
-    vertex_list.push_back(out_mesh->vertexBuffer[i]);
-
- // out_mesh->quad_tree_start = new QuadtreeNode(vertex_list);
 /////////////////////////////////////////////////////////
 }
 
@@ -304,10 +312,6 @@ void Mesh::write(char* out_file){
   stream.close();
 }
 Mesh::~Mesh(){
-  if (quad_tree_start){
-    delete[] quad_tree_start;
-    quad_tree_start = NULL;
-  }
   if (vertexBuffer){
     delete[] vertexBuffer;
     vertexBuffer = NULL;
