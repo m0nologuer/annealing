@@ -84,7 +84,11 @@ int main (int argc, char *argv[]) {
   } while (counter < ITERATIONS);
 
   for (int i = 0; i < meshCount; ++i)
-    meshes[i].write(argv[i+1]);
+  {
+    char output_file[64];
+    sprintf((char*)output_file,"output%d.obj",i);
+    meshes[i].write(output_file);
+  }
 
   delete[] meshes;
 
