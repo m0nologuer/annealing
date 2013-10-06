@@ -31,4 +31,5 @@ public:
 
   void write(char* out_obj_file);
   static void meshFromFile(char* filename, Mesh* out_mesh);
+  static void concatenate(Mesh* meshArray, int mesh_count, Mesh* out_mesh);
 };

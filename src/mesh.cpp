@@ -46,9 +46,43 @@ void Mesh::boundingBox(float &x, float &x_max, float &y, float &y_max, float &z,
   }
 
 }
+void Mesh::concatenate(Mesh* meshArray, int mesh_count, Mesh* out_mesh){
+    int face_count = 0;
+    int vertex_count = 0;
+    int* buffer_sizes = new int[mesh_count];
+
+    for (int i = 0; i < mesh_count; ++i)
+    {
+      buffer_sizes[i] = vertex_count;
+      face_count += meshArray[i].face_count;
+      vertex_count += meshArray[i].vertex_count;
+    }
+
+    out_mesh->face_count = face_count;
+    out_mesh->vertex_count = vertex_count;
+    out_mesh->vertexBuffer = new Eigen::Vector3f[vertex_count];
+    out_mesh->indexBuffer = new int[face_count*3];
+
+    Eigen::Vector3f* vertex_pointer = out_mesh->vertexBuffer;
+    int* index_pointer = out_mesh->indexBuffer;
+
+    for (int i = 0; i < mesh_count; ++i)
+    {
+      for (int j = 0; j < meshArray[i].vertex_count; ++j)
+        vertex_pointer[j] = meshArray[i].vertexBuffer[j];
+
+      for (int j = 0; j < meshArray[i].face_count*3; ++j)
+        index_pointer[j] = meshArray[i].indexBuffer[j] + buffer_sizes[i];
+
+      vertex_pointer += meshArray[i].vertex_count;
+      index_pointer+= meshArray[i].face_count*3;      
+    }
+
+}
+
 void Mesh::rotateLessThan(float max_rotation, Eigen::Vector3f& vector_to_closest_object){
   Eigen::Vector3f midPoint = (current_center+prev_center)*0.5;
-  Eigen::Vector3f rotation_axis = (vector_to_closest_object).cross(current_center-prev_center);
+  Eigen::Vector3f rotation_axis = (vector_to_closest_object).cross(prev_center-current_center);
   if (rotation_axis == Eigen::Vector3f(0,0,0))
     return;
   else
@@ -90,10 +124,10 @@ void Mesh::updateMinDistance(Mesh* secondMesh, float cube_size, float& distance,
   buildQuadtree(&tree1, cube_size);
   secondMesh->buildQuadtree(&tree2, cube_size);
 
-  tree1->updateShortestDistanceTo(tree2, vector_to_closest_object);
+  tree2->updateShortestDistanceTo(tree1, vector_to_closest_object);
   delete tree1;
   delete tree2;
- /* 
+ /*
   float dist_squared = distance* distance;
 
   for (int i = 0; i < vertex_count; ++i)
@@ -137,7 +171,7 @@ Eigen::Vector3f Mesh::smallestVectorToCube(float cube_size){
 
   Eigen::Vector3f shortest_vector(-x,0,0);
   float min_distance = x;
-  
+
   updateMinVector(y, Eigen::Vector3f(0,-1,0), min_distance, shortest_vector);
   updateMinVector(z, Eigen::Vector3f(0,0,-1), min_distance, shortest_vector);
 
