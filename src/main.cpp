@@ -6,12 +6,12 @@
 #include "mesh.h"
 
 #define GAP 0.1f
-#define PADDING 300.0f
+#define PADDING 30.0f
 #define PERCENT_TRANSLATION 0.5
 #define PERCENT_ROTATION 0.5
-#define ITERATIONS 2000
-#define SPACING 50.0
-#define CUBE_SHRINKAGE_RATE 0.001
+#define ITERATIONS 100
+#define SPACING 5.0
+#define CUBE_SHRINKAGE_RATE 0.01
 #define CONST_PI 3.14
 
 using namespace std;

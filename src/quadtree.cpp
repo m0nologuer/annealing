@@ -18,10 +18,10 @@ void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3
       if (tree2->leaf)
       {
         float min_distance = min_vector.norm();
-        for (int i = 0; i < vertex_points; ++i)
-          for (int j = 0; j < tree2->vertex_points; ++j)
+        for (int i = 0; i < triangle_count; ++i)
+          for (int j = 0; j < tree2->triangle_count; ++j)
           {
-            Eigen::Vector3f difference = points[i]-tree2->points[j];
+            Eigen::Vector3f difference = triangles[i].shortestDistanceTo(tree2->triangles[j]);
             if (difference.norm() < min_distance)
             {
               min_distance = difference.norm();
@@ -57,28 +57,33 @@ void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3
    //     delete[] next_level[i];
   }
 
-  QuadtreeNode::QuadtreeNode(std::vector<Eigen::Vector3f> vertices, Eigen::Vector3f box_min, Eigen::Vector3f box_max){
+  QuadtreeNode::QuadtreeNode(std::vector<Triangle*> vertices, Eigen::Vector3f box_min, Eigen::Vector3f box_max){
     bounding_box_min = box_min;
     bounding_box_max = box_max;
 
-    if (!(vertices.size() > max_vertices_per_leaf ))
+    if (!(vertices.size() > max_triangles_per_leaf ))
     { 
       leaf = true;
       for (int i = 0; i < 8; ++i)
         next_level[i] = NULL;
-      vertex_points = vertices.size();
+      triangle_count = vertices.size();
       for (int i = 0; i < vertices.size(); ++i)
-        points[i] = vertices[i];
+        triangles[i] = *vertices[i];
     }
     else
     {
       leaf = false;
-      std::vector<Eigen::Vector3f> vector_lists[8];
+      std::vector<Triangle*> vector_lists[8];
       Eigen::Vector3f medium = (bounding_box_min+bounding_box_max)*0.5;
       for (int i = 0; i < vertices.size(); ++i)
       {
-        int node_index = comparison_index(vertices[i], medium);
-        vector_lists[node_index].push_back(vertices[i]);
+        for (int j = 0; j < 3; j++)
+        {
+          int node_index = comparison_index(vertices[i]->points[j], medium);
+          if (!(std::find(vector_lists[node_index].begin(), vector_lists[node_index].end(), vertices[i])
+           != vector_lists[node_index].end())) 
+            vector_lists[node_index].push_back(vertices[i]);
+        }
       } 
       for (int i = 0; i < 8; ++i)
       {
@@ -97,3 +102,58 @@ void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3
       }
     }
   }
+
+Triangle::Triangle(){};
+Triangle::Triangle(Eigen::Vector3f a, Eigen::Vector3f b, Eigen::Vector3f c){
+  points[0] = a;
+  points[1] = b;
+  points[2] = c;
+
+  normal = ((b-a).cross(c-b)).normalized();
+};
+Triangle::Triangle( const Triangle& other ){
+  for (int i = 0; i < 3; ++i)
+    points[i] = other.points[i];
+}
+Eigen::Vector3f Triangle::shortestDistanceTo(Eigen::Vector3f point){
+
+  Eigen::Vector3f projected_point = point - points[0];
+  float bary1 = projected_point.dot(points[1]-points[0]);
+
+  projected_point = projected_point - bary1*(points[1]-points[0]);
+  float bary2 = projected_point.dot(points[2]-points[0]);
+
+  if (bary1 >= 0 && bary1 <= 1 && bary2 >= 0 && bary2 <= 1)
+  {
+    return ((bary1*(points[1]-points[0])-bary2*(points[2]-points[0]))+points[0] - point);
+  }
+  else
+  {
+    Eigen::Vector3f distance = points[0] - point;
+    for (int i = 1; i < 3; ++i)
+    {
+      Eigen::Vector3f new_dist = points[i] - point;
+      if (new_dist.norm() < distance.norm())
+        distance = new_dist;
+    }
+    return distance;
+  }
+}
+Eigen::Vector3f Triangle::shortestDistanceTo(Triangle other){
+
+  Eigen::Vector3f distance = shortestDistanceTo(other.points[0]);
+  for (int i = 1; i < 3; ++i)
+  {
+    Eigen::Vector3f new_dist = shortestDistanceTo(other.points[i]);
+    if (new_dist.norm() < distance.norm())
+      distance = new_dist;
+  }
+
+  for (int i = 1; i < 3; ++i)
+  {
+    Eigen::Vector3f new_dist = other.shortestDistanceTo(points[i]);
+    if (new_dist.norm() < distance.norm())
+      distance = new_dist;
+  }
+  return distance;
+}

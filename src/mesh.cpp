@@ -110,9 +110,12 @@ void Mesh::move(Eigen::Vector3f translation)
     vertexBuffer[i] += translation;
 }
 void Mesh::buildQuadtree(QuadtreeNode** out_tree, float cube_size){
-  std::vector<Eigen::Vector3f> vertex_list;
-  for (int i = 0; i < vertex_count; ++i)
-    vertex_list.push_back(vertexBuffer[i]);
+  std::vector<Triangle*> vertex_list;
+  for (int i = 0; i < face_count; ++i)
+  {
+    vertex_list.push_back(new Triangle(vertexBuffer[indexBuffer[3*i]-1],vertexBuffer[indexBuffer[3*i+1]-1],
+      vertexBuffer[indexBuffer[3*i+2]-1]));
+  }
 
   *out_tree = new QuadtreeNode(vertex_list, Eigen::Vector3f(0,0,0), Eigen::Vector3f(cube_size, cube_size, cube_size));
 
@@ -123,7 +126,6 @@ void Mesh::updateMinDistance(Mesh* secondMesh, float cube_size, float& distance,
   QuadtreeNode* tree1; QuadtreeNode* tree2;
   buildQuadtree(&tree1, cube_size);
   secondMesh->buildQuadtree(&tree2, cube_size);
-
   tree2->updateShortestDistanceTo(tree1, vector_to_closest_object);
   delete tree1;
   delete tree2;

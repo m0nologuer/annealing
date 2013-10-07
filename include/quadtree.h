@@ -10,22 +10,35 @@
 
 using namespace std; 
 
-#define max_vertices_per_leaf 5
+#define max_triangles_per_leaf 10
+
+
+class Triangle
+{
+  Eigen::Vector3f normal;
+public:
+  Eigen::Vector3f points[3];
+  Triangle();
+  Triangle(Eigen::Vector3f a, Eigen::Vector3f b, Eigen::Vector3f c);
+  Triangle( const Triangle& other );
+  Eigen::Vector3f shortestDistanceTo(Triangle other);
+  Eigen::Vector3f shortestDistanceTo(Eigen::Vector3f point);
+};
 
 class QuadtreeNode
 {
   bool leaf;
 
   QuadtreeNode* next_level[8];
-  Eigen::Vector3f points[max_vertices_per_leaf];
-  int vertex_points;
+  Triangle triangles[max_triangles_per_leaf];
+  int triangle_count;
 
   Eigen::Vector3f bounding_box_max;
   Eigen::Vector3f bounding_box_min;
 
 public:
   QuadtreeNode();
-  QuadtreeNode(std::vector<Eigen::Vector3f> vertices, Eigen::Vector3f box_min, Eigen::Vector3f box_max);
+  QuadtreeNode(std::vector<Triangle*> vertices, Eigen::Vector3f box_min, Eigen::Vector3f box_max);
   void updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3f& min_vector);
   ~QuadtreeNode();
 
