@@ -58,15 +58,16 @@ void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3
   }
 
   QuadtreeNode::QuadtreeNode(std::vector<Triangle*> vertices, Eigen::Vector3d box_min, Eigen::Vector3d box_max){
+
+    cout << vertices.size() << endl;
     cout << box_min(0) << " " << box_min(1) << " " << box_min(2) << " " << endl;
     cout << box_max(0) << " " << box_max(1) << " " << box_max(2) << " " << endl;
 
     bounding_box_min = box_min;
     bounding_box_max = box_max;
 
-    if (fabs((box_max-box_min).norm()) < 1e-7)
+    if (fabs((box_max-box_min).norm()) < 1e-13)
     {
-      cout << vertices.size() << endl << endl;
       cerr << "in QuadtreeNode::QuadtreeNode(): numerical precision error" << endl;
       return;
     }
@@ -90,22 +91,26 @@ void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3
         for (int j = 0; j < 3; j++)
         {
           int node_index = comparison_index(vertices[i]->points[j], medium);
+          cout << node_index << " " << vertices[i]->points[j](0) << " " << vertices[i]->points[j](1) 
+            << " " << vertices[i]->points[j](2) << endl;
+
           if (!(std::find(vector_lists[node_index].begin(), vector_lists[node_index].end(), vertices[i])
            != vector_lists[node_index].end())) 
             vector_lists[node_index].push_back(vertices[i]);
         }
       } 
+      cout << endl;
       for (int i = 0; i < 8; ++i)
       {
         Eigen::Vector3d min, max;
 
-        if ((i/4) == 0) {min(0) = box_min(0); max(0) = medium(0);}
+        if (i < 4) {min(0) = box_min(0); max(0) = medium(0);}
         else {min(0) = medium(0); max(0) = box_max(0);}
 
-        if (((i%4)/2) == 0) {min(1) = box_min(1); max(1) = medium(1);}
+        if ((i%4) < 2) {min(1) = box_min(1); max(1) = medium(1);}
         else {min(1) = medium(1); max(1) = box_max(1);}
 
-        if ((i%2) == 2) {min(2) = box_min(2); max(2) = medium(2);}
+        if ((i%2) < 1) {min(2) = box_min(2); max(2) = medium(2);}
         else {min(2) = medium(2); max(2) = box_max(2);}
 
         next_level[i] = new QuadtreeNode(vector_lists[i],min,max);

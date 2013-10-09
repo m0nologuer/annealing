@@ -10,7 +10,7 @@
 
 using namespace std; 
 
-#define max_triangles_per_leaf 20
+#define max_triangles_per_leaf 5
 
 
 class Triangle
@@ -30,7 +30,7 @@ class QuadtreeNode
   bool leaf;
 
   QuadtreeNode* next_level[8];
-  Triangle triangles[max_triangles_per_leaf];
+  std::vector<Triangle*> triangles;
   int triangle_count;
 
   Eigen::Vector3d bounding_box_max;
