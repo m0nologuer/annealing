@@ -2,15 +2,15 @@
 
 class Mesh
 {
-  Eigen::Vector3f* vertexBuffer;
+  Eigen::Vector3d* vertexBuffer;
   int* indexBuffer;
 
   int vertex_count;
   int face_count;
 
-  Eigen::Vector3f current_center;
-  Eigen::Vector3f prev_center;
-  float boundingSphere;
+  Eigen::Vector3d current_center;
+  Eigen::Vector3d prev_center;
+  double boundingSphere;
 
 public:
 
@@ -18,16 +18,16 @@ public:
   ~Mesh();
 
   void moveToOrigin();
-  void boundingBox(float &x, float &x_max, float &y, float &y_max, float &z, float &z_max);
-  void boundingBoxSize(float &x, float &y, float &z);
+  void boundingBox(double &x, double &x_max, double &y, double &y_max, double &z, double &z_max);
+  void boundingBoxSize(double &x, double &y, double &z);
 
-  void rotate(Eigen::Matrix3f rotation, Eigen::Vector3f about);
-  void move(Eigen::Vector3f translation);
+  void rotate(Eigen::Matrix3d rotation, Eigen::Vector3d about);
+  void move(Eigen::Vector3d translation);
 
-  void buildQuadtree(QuadtreeNode** out_tree, float cube_size);
-  void updateMinDistance(Mesh* secondMesh, float cube_size, float& distance, Eigen::Vector3f& vector_to_closest_object);
-  void rotateLessThan(float max_rotation, Eigen::Vector3f& vector_to_closest_object);
-  Eigen::Vector3f smallestVectorToCube(float cube_size);
+  void buildQuadtree(QuadtreeNode** out_tree, double cube_size);
+  void updateMinDistance(Mesh* secondMesh, double cube_size, double& distance, Eigen::Vector3d& vector_to_closest_object);
+  void rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closest_object);
+  Eigen::Vector3d smallestVectorToCube(double cube_size);
 
   void write(char* out_obj_file);
   static void meshFromFile(char* filename, Mesh* out_mesh);

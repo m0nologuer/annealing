@@ -6,8 +6,8 @@ Mesh::Mesh(){
   vertexBuffer = NULL;
   indexBuffer = NULL;
 
-  current_center = Eigen::Vector3f(0,0,0);
-  prev_center = Eigen::Vector3f(0,0,0);
+  current_center = Eigen::Vector3d(0,0,0);
+  prev_center = Eigen::Vector3d(0,0,0);
   boundingSphere = 0;
 
 }
@@ -15,12 +15,12 @@ Mesh::Mesh(){
 void Mesh::moveToOrigin(){
   if (!vertexBuffer)
     return;
-  float x,y,z,a,b,c;
+  double x,y,z,a,b,c;
   boundingBox(x,a,y,b,z,c);
-  move(Eigen::Vector3f(-x,-y,-z));
+  move(Eigen::Vector3d(-x,-y,-z));
 }
 
-void Mesh::boundingBox(float &x, float &x_max, float &y, float &y_max, float &z, float &z_max){
+void Mesh::boundingBox(double &x, double &x_max, double &y, double &y_max, double &z, double &z_max){
   if (!vertexBuffer)
     return;
 
@@ -60,10 +60,10 @@ void Mesh::concatenate(Mesh* meshArray, int mesh_count, Mesh* out_mesh){
 
     out_mesh->face_count = face_count;
     out_mesh->vertex_count = vertex_count;
-    out_mesh->vertexBuffer = new Eigen::Vector3f[vertex_count];
+    out_mesh->vertexBuffer = new Eigen::Vector3d[vertex_count];
     out_mesh->indexBuffer = new int[face_count*3];
 
-    Eigen::Vector3f* vertex_pointer = out_mesh->vertexBuffer;
+    Eigen::Vector3d* vertex_pointer = out_mesh->vertexBuffer;
     int* index_pointer = out_mesh->indexBuffer;
 
     for (int i = 0; i < mesh_count; ++i)
@@ -80,28 +80,29 @@ void Mesh::concatenate(Mesh* meshArray, int mesh_count, Mesh* out_mesh){
 
 }
 
-void Mesh::rotateLessThan(float max_rotation, Eigen::Vector3f& vector_to_closest_object){
-  Eigen::Vector3f midPoint = (current_center+prev_center)*0.5;
-  Eigen::Vector3f rotation_axis = (vector_to_closest_object).cross(prev_center-current_center);
-  if (rotation_axis == Eigen::Vector3f(0,0,0))
+void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closest_object){
+  Eigen::Vector3d midPoint = (current_center+prev_center)*0.5;
+  Eigen::Vector3d rotation_axis = (vector_to_closest_object).cross(prev_center-current_center);
+
+  if (rotation_axis == Eigen::Vector3d(0,0,0))
     return;
   else
     rotation_axis.normalize();
-  float max_distance_to_midpoint = (current_center-midPoint).norm() + boundingSphere;
+  double max_distance_to_midpoint = (current_center-midPoint).norm() + boundingSphere;
 
-  float angle = asin(max_distance_to_midpoint/max_rotation)*2;
+  double angle = asin(max_rotation/max_distance_to_midpoint)*2;
 
   if (angle == angle)
-    rotate(Eigen::AngleAxisf(angle, rotation_axis)*Eigen::Scaling(1.0f), midPoint);
+    rotate(Eigen::AngleAxisd(angle, rotation_axis)*Eigen::Scaling(1.0), midPoint);
 
 }
-void Mesh::rotate(Eigen::Matrix3f rotation, Eigen::Vector3f about)
+void Mesh::rotate(Eigen::Matrix3d rotation, Eigen::Vector3d about)
 {
   for (int i = 0; i < vertex_count; ++i)
     vertexBuffer[i] = rotation*(vertexBuffer[i]-about)+about ;
 }
 
-void Mesh::move(Eigen::Vector3f translation)
+void Mesh::move(Eigen::Vector3d translation)
 {
   prev_center = current_center;
   current_center+= translation;
@@ -109,7 +110,7 @@ void Mesh::move(Eigen::Vector3f translation)
   for (int i = 0; i < vertex_count; ++i)
     vertexBuffer[i] += translation;
 }
-void Mesh::buildQuadtree(QuadtreeNode** out_tree, float cube_size){
+void Mesh::buildQuadtree(QuadtreeNode** out_tree, double cube_size){
   std::vector<Triangle*> vertex_list;
   for (int i = 0; i < face_count; ++i)
   {
@@ -117,11 +118,11 @@ void Mesh::buildQuadtree(QuadtreeNode** out_tree, float cube_size){
       vertexBuffer[indexBuffer[3*i+2]-1]));
   }
 
-  *out_tree = new QuadtreeNode(vertex_list, Eigen::Vector3f(0,0,0), Eigen::Vector3f(cube_size, cube_size, cube_size));
+  *out_tree = new QuadtreeNode(vertex_list, Eigen::Vector3d(0,0,0), Eigen::Vector3d(cube_size, cube_size, cube_size));
 
 }
 
-void Mesh::updateMinDistance(Mesh* secondMesh, float cube_size, float& distance, Eigen::Vector3f& vector_to_closest_object){
+void Mesh::updateMinDistance(Mesh* secondMesh, double cube_size, double& distance, Eigen::Vector3d& vector_to_closest_object){
 
   QuadtreeNode* tree1; QuadtreeNode* tree2;
   buildQuadtree(&tree1, cube_size);
@@ -130,12 +131,12 @@ void Mesh::updateMinDistance(Mesh* secondMesh, float cube_size, float& distance,
   delete tree1;
   delete tree2;
  /*
-  float dist_squared = distance* distance;
+  double dist_squared = distance* distance;
 
   for (int i = 0; i < vertex_count; ++i)
     for (int j = 0; j < secondMesh->vertex_count; ++j)
     {
-      float new_distance = (vertexBuffer[i]-secondMesh->vertexBuffer[j]).squaredNorm();
+      double new_distance = (vertexBuffer[i]-secondMesh->vertexBuffer[j]).squaredNorm();
       if (new_distance < dist_squared)
       {
         distance = new_distance;
@@ -146,11 +147,11 @@ void Mesh::updateMinDistance(Mesh* secondMesh, float cube_size, float& distance,
 */
 }
 
-void Mesh::boundingBoxSize(float &j, float &k, float &l){
+void Mesh::boundingBoxSize(double &j, double &k, double &l){
   if (!vertexBuffer)
     return;
 
-  float x,y,z,a,b,c;
+  double x,y,z,a,b,c;
   boundingBox(x,a,y,b,z,c);
 
   j = a-x;
@@ -158,7 +159,7 @@ void Mesh::boundingBoxSize(float &j, float &k, float &l){
   l = c-z;
 }
 
-void updateMinVector(float distance, Eigen::Vector3f vector, float& min_distance, Eigen::Vector3f& new_vector)
+void updateMinVector(double distance, Eigen::Vector3d vector, double& min_distance, Eigen::Vector3d& new_vector)
 {
   if (distance < min_distance)
   {
@@ -167,19 +168,19 @@ void updateMinVector(float distance, Eigen::Vector3f vector, float& min_distance
   }
 }
 
-Eigen::Vector3f Mesh::smallestVectorToCube(float cube_size){
-  float x,y,z,a,b,c;
+Eigen::Vector3d Mesh::smallestVectorToCube(double cube_size){
+  double x,y,z,a,b,c;
   boundingBox(x,a,y,b,z,c);
 
-  Eigen::Vector3f shortest_vector(-x,0,0);
-  float min_distance = x;
+  Eigen::Vector3d shortest_vector(-x,0,0);
+  double min_distance = x;
 
-  updateMinVector(y, Eigen::Vector3f(0,-1,0), min_distance, shortest_vector);
-  updateMinVector(z, Eigen::Vector3f(0,0,-1), min_distance, shortest_vector);
+  updateMinVector(y, Eigen::Vector3d(0,-1,0), min_distance, shortest_vector);
+  updateMinVector(z, Eigen::Vector3d(0,0,-1), min_distance, shortest_vector);
 
-  updateMinVector(cube_size-a, Eigen::Vector3f(1,0,0), min_distance, shortest_vector);
-  updateMinVector(cube_size-b, Eigen::Vector3f(0,1,0), min_distance, shortest_vector);
-  updateMinVector(cube_size-c, Eigen::Vector3f(0,0,1), min_distance, shortest_vector);
+  updateMinVector(cube_size-a, Eigen::Vector3d(1,0,0), min_distance, shortest_vector);
+  updateMinVector(cube_size-b, Eigen::Vector3d(0,1,0), min_distance, shortest_vector);
+  updateMinVector(cube_size-c, Eigen::Vector3d(0,0,1), min_distance, shortest_vector);
 
   return shortest_vector;
 }
@@ -214,7 +215,7 @@ void getObjFileLength(char* obj_file, int* face_count, int* vertex_count){
 void Mesh::meshFromFile(char* filename, Mesh* out_mesh){
   //initalizing mesh
   getObjFileLength(filename, &out_mesh->face_count, &out_mesh->vertex_count);
-  out_mesh->vertexBuffer = new Eigen::Vector3f[out_mesh->vertex_count];
+  out_mesh->vertexBuffer = new Eigen::Vector3d[out_mesh->vertex_count];
   out_mesh->indexBuffer = new int[out_mesh->face_count*3];
 
   out_mesh->face_count = 0;
@@ -257,7 +258,7 @@ void Mesh::meshFromFile(char* filename, Mesh* out_mesh){
       }
 
       // Create vertex
-      out_mesh->vertexBuffer[out_mesh->vertex_count] = Eigen::Vector3f(x, y, z);
+      out_mesh->vertexBuffer[out_mesh->vertex_count] = Eigen::Vector3d(x, y, z);
       out_mesh->vertex_count++;
     }
     else if (!strcmp(keyword, "f")) {
@@ -311,12 +312,12 @@ void Mesh::meshFromFile(char* filename, Mesh* out_mesh){
   // Close file
   fclose(fp);
 
-  float x,y,z,a,b,c;
+  double x,y,z,a,b,c;
   out_mesh->boundingBox(x,a,y,b,z,c);
 
-  out_mesh->current_center = (Eigen::Vector3f(x,y,z)+Eigen::Vector3f(a,b,c))*0.5;
-  out_mesh->prev_center = Eigen::Vector3f(0,0,-1) + out_mesh->current_center;
-  out_mesh->boundingSphere = (out_mesh->current_center-Eigen::Vector3f(x,y,z)).norm();
+  out_mesh->current_center = (Eigen::Vector3d(x,y,z)+Eigen::Vector3d(a,b,c))*0.5;
+  out_mesh->prev_center = Eigen::Vector3d(0,0,-1) + out_mesh->current_center;
+  out_mesh->boundingSphere = (out_mesh->current_center-Eigen::Vector3d(x,y,z)).norm();
 
 /////////////////////////////////////////////////////////
 }
