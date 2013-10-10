@@ -82,6 +82,7 @@ void Mesh::concatenate(Mesh* meshArray, int mesh_count, Mesh* out_mesh){
 
 
 void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closest_object){
+
   Eigen::Vector3d midPoint = (current_center+prev_center)*0.5;
   Eigen::Vector3d rotation_axis = (vector_to_closest_object).cross(prev_closest_point-current_closest_point);
 

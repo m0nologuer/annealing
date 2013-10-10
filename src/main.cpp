@@ -5,13 +5,13 @@
 #include <string>
 #include "mesh.h"
 
-#define GAP 3.0
+#define GAP 0.4
 #define PADDING 50.0f
 #define PERCENT_TRANSLATION 0.35f
-#define PERCENT_ROTATION 0.25f
-#define ITERATIONS 400
+#define PERCENT_ROTATION 0.35f
+#define ITERATIONS 100
 #define SPACING 20
-#define CUBE_SHRINKAGE_RATE 0.005
+#define CUBE_SHRINKAGE_RATE 0.01
 #define CONST_PI 3.14
 
 using namespace std;
@@ -33,7 +33,7 @@ int main (int argc, char *argv[]) {
     Eigen::Vector3d random_direction((rand()%100)*0.01,(rand()%100)*0.01,(rand()%100)*0.01);
     random_direction.normalize();
     meshes[i].rotate(Eigen::AngleAxisd((rand()%100)*0.01*CONST_PI, random_direction)*Eigen::Scaling(1.0), Eigen::Vector3d(0,0,0));
-    
+  
     meshes[i].moveToOrigin();
     double x,y,z;
     meshes[i].boundingBoxSize(x,y,z);
