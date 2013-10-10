@@ -149,17 +149,17 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
   }
   else if (edge1 >= 0 && edge1 <= 1)
   {
-    Eigen::Vector3d closest_point = edge1*points[0] + (1- edge1)*points[1];
+    Eigen::Vector3d closest_point = edge1*points[1] + (1- edge1)*points[0];
     return closest_point - point;
   }
   else if (edge2 >= 0 && edge2 <= 1)
   {
-    Eigen::Vector3d closest_point = edge2*points[1] + (1- edge2)*points[2];
+    Eigen::Vector3d closest_point = edge2*points[2] + (1- edge2)*points[1];
     return closest_point - point;
   }
   else if (edge3 >= 0 && edge3 <= 1)
   {
-    Eigen::Vector3d closest_point = edge3*points[2] + (1- edge3)*points[0];
+    Eigen::Vector3d closest_point = edge3*points[0] + (1- edge3)*points[2];
     return closest_point - point;
   }
   else
@@ -176,26 +176,7 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
 }
 Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& closest_point){
 
-  Eigen::Vector3d distance = shortestDistanceTo(other->points[0]);
-  closest_point = distance + other->points[0];
-  for (int i = 1; i < 3; ++i)
-  {
-    Eigen::Vector3d new_dist = shortestDistanceTo(other->points[i]);
-    if (new_dist.norm() < distance.norm())
-    {
-      distance = new_dist;
-      closest_point = distance + other->points[i];
-    }
-  }
 
-  for (int i = 1; i < 3; ++i)
-  {
-    Eigen::Vector3d new_dist = -other->shortestDistanceTo(points[i]);
-    if (new_dist.norm() < distance.norm())
-    {
-      distance = new_dist;
-      closest_point = points[i];
-    }
-  }
-  return distance*1.2;
+
+
 }
