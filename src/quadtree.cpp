@@ -127,6 +127,40 @@ Triangle::Triangle( const Triangle& other ){
   for (int i = 0; i < 3; ++i)
     points[i] = other.points[i];
 }
+Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d line_segment_start, Eigen::Vector3d line_segment_end, Eigen::Vector3d& mesh_closest_point)
+{
+  Eigen::Vector3d shortest_dist(BIG_DOUBLE,BIG_DOUBLE,BIG_DOUBLE);
+
+  //line intersection with all of the edges
+  Eigen::Vector3d normal = ((points[1]-points[0]).cross(points[2]-points[1])).normalized();
+  Eigen::Vector3d p = line_segment_start - line_segment_start.dot(normal)*normal;
+  Eigen::Vector3d r = (line_segment_end - line_segment_end.dot(normal)*normal) - p;
+
+  for (int i = 0; i < 3; ++i)
+  {
+    Eigen::Vector3d q = points[i];
+    Eigen::Vector3d s = points[(i+1)%3] - q;
+
+    double u = ((q-p).cross(r)).norm()/(r.cross(s)).norm();
+    double t = ((q-p).cross(s)).norm()/(r.cross(s)).norm();
+
+    if (u >= 0 && u <= 1 && t >= 0 && t <= 1)
+    {
+      Eigen::Vector3d closest_point = q + u*s;
+      Eigen::Vector3d mesh_close_point = (line_segment_start*(1-t) + line_segment_end*t);
+      Eigen::Vector3d short_distance = mesh_close_point - closest_point;
+
+      if (short_distance.norm() < shortest_dist.norm())
+      {
+        shortest_dist = short_distance;
+        mesh_closest_point = mesh_close_point;
+      }
+    }
+
+  }
+  return shortest_dist;
+}
+
 Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
 
   //use barycentric coordinates to find shortest distance from a triangle to a point
@@ -162,7 +196,7 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
     Eigen::Vector3d closest_point = edge3*points[0] + (1- edge3)*points[2];
     return closest_point - point;
   }
-  else
+  else // go through vertices and pick the cloests.
   {
     Eigen::Vector3d distance = points[0] - point;
     for (int i = 1; i < 3; ++i)
@@ -176,7 +210,52 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
 }
 Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& closest_point){
 
+  Eigen::Vector3d distance = shortestDistanceTo(other->points[0]);
+  closest_point = distance + other->points[0];
 
+  //project all vertices onto other triangle
+  for (int i = 1; i < 3; ++i)
+  {
+    Eigen::Vector3d new_dist = shortestDistanceTo(other->points[i]);
+    if (new_dist.norm() < distance.norm())
+    {
+      distance = new_dist;
+      closest_point = distance + other->points[i];
+    }
+  }
+  //project other triangle vertices onto us
+  for (int i = 0; i < 3; ++i)
+  {
+    Eigen::Vector3d new_dist = -other->shortestDistanceTo(points[i]);
+    if (new_dist.norm() < distance.norm())
+    {
+      distance = new_dist;
+      closest_point = points[i];
+    }
+  }
+  //project edges onto other triangle, do line intersections
+  for (int i = 0; i < 3; ++i)
+  {
+    Eigen::Vector3d close_point;
+    Eigen::Vector3d new_dist = shortestDistanceTo(other->points[i], other->points[(i+1)%3], close_point);
+    if (new_dist.norm() < distance.norm())
+    {
+      distance = new_dist;
+      closest_point = close_point;
+    }
+  }
 
+  /*
+  for (int i = 0; i < 3; ++i)
+  {
+    Eigen::Vector3d close_point;
+    Eigen::Vector3d new_dist =  -other->shortestDistanceTo(points[i],points[(i+1)%3], close_point);
+    if (new_dist.norm() < distance.norm())
+    {
+      distance = new_dist;
+      closest_point = close_point;
+    }
+  }*/
 
+  return distance;
 }

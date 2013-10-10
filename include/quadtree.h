@@ -11,7 +11,7 @@
 using namespace std; 
 
 #define max_triangles_per_leaf 5
-
+#define BIG_DOUBLE 1000000.0
 
 class Triangle
 {
@@ -23,6 +23,7 @@ public:
   Triangle( const Triangle& other );
   Eigen::Vector3d shortestDistanceTo(Eigen::Vector3d point);
   Eigen::Vector3d shortestDistanceTo(Triangle* other, Eigen::Vector3d& closest_point);
+  Eigen::Vector3d shortestDistanceTo(Eigen::Vector3d line_segment_start, Eigen::Vector3d line_segment_end, Eigen::Vector3d& mesh_closest_point);
 };
 
 class QuadtreeNode
