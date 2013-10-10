@@ -129,16 +129,38 @@ Triangle::Triangle( const Triangle& other ){
 }
 Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
 
+  //use barycentric coordinates to find shortest distance from a triangle to a point
+
   Eigen::Vector3d projected_point = point - points[0];
-  double bary1 = projected_point.dot(points[1]-points[0]);
+  double bary1 = projected_point.dot((points[1]-points[0]).normalized());
 
   projected_point = projected_point - bary1*(points[1]-points[0]);
-  double bary2 = projected_point.dot(points[2]-points[0]);
+  double bary2 = projected_point.dot((points[2]-points[0]).normalized());
+
+  //project point onto all three edges
+  double edge1 = (point-points[0]).dot((points[1]-points[0]).normalized());
+  double edge2 = (point-points[1]).dot((points[2]-points[1]).normalized());
+  double edge3 = (point-points[2]).dot((points[0]-points[2]).normalized());
 
   if (bary1 >= 0 && bary1 <= 1 && bary2 >= 0 && bary2 <= 1)
   {
     Eigen::Vector3d closest_point = (bary1*(points[1]-points[0])-bary2*(points[2]-points[0]))+points[0];
     return (closest_point - point);
+  }
+  else if (edge1 >= 0 && edge1 <= 1)
+  {
+    Eigen::Vector3d closest_point = edge1*points[0] + (1- edge1)*points[1];
+    return closest_point - point;
+  }
+  else if (edge2 >= 0 && edge2 <= 1)
+  {
+    Eigen::Vector3d closest_point = edge2*points[1] + (1- edge2)*points[2];
+    return closest_point - point;
+  }
+  else if (edge3 >= 0 && edge3 <= 1)
+  {
+    Eigen::Vector3d closest_point = edge3*points[2] + (1- edge3)*points[0];
+    return closest_point - point;
   }
   else
   {
@@ -175,5 +197,5 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& c
       closest_point = points[i];
     }
   }
-  return distance;
+  return distance*1.2;
 }

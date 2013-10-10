@@ -95,7 +95,7 @@ void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closes
   double angle = asin(max_rotation/(2*max_distance_to_midpoint))*2;
 
   if (angle == angle)
-    rotate(Eigen::AngleAxisd(angle, rotation_axis)*Eigen::Scaling(1.0), midPoint);
+    rotate(Eigen::AngleAxisd(-angle, rotation_axis)*Eigen::Scaling(1.0), midPoint);
 
 }
 void Mesh::rotate(Eigen::Matrix3d rotation, Eigen::Vector3d about)

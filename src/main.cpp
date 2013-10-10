@@ -5,10 +5,10 @@
 #include <string>
 #include "mesh.h"
 
-#define GAP 0.4
+#define GAP 0.3
 #define PADDING 50.0f
 #define PERCENT_TRANSLATION 0.35f
-#define PERCENT_ROTATION 0.35f
+#define PERCENT_ROTATION 0.25f
 #define ITERATIONS 100
 #define SPACING 20
 #define CUBE_SHRINKAGE_RATE 0.01
