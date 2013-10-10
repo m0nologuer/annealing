@@ -5,12 +5,12 @@
 #include <string>
 #include "mesh.h"
 
-#define GAP 0.1f
-#define PADDING 30.0f
-#define PERCENT_TRANSLATION 0.45
-#define PERCENT_ROTATION 0.45
-#define ITERATIONS 1
-#define SPACING 5.0
+#define GAP 3.0
+#define PADDING 50.0f
+#define PERCENT_TRANSLATION 0.25f
+#define PERCENT_ROTATION 0.35f
+#define ITERATIONS 400
+#define SPACING 20
 #define CUBE_SHRINKAGE_RATE 0.01
 #define CONST_PI 3.14
 
@@ -64,8 +64,8 @@ int main (int argc, char *argv[]) {
           meshes[i].updateMinDistance(&meshes[j], cube_size, closest_distance, vector_to_closest_object);
 
       //rotate and translate
-      double translation_distance = (closest_distance- GAP)*PERCENT_TRANSLATION;
-      double rotation_distance = (closest_distance- GAP)*PERCENT_ROTATION;
+      double translation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_TRANSLATION;
+      double rotation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_ROTATION;
 
       meshes[i].rotateLessThan(rotation_distance,vector_to_closest_object);
       meshes[i].move(vector_to_closest_object*translation_distance/closest_distance);
@@ -86,7 +86,7 @@ int main (int argc, char *argv[]) {
     cube_size = real_cube_size*CUBE_SHRINKAGE_RATE + cube_size*(1- CUBE_SHRINKAGE_RATE);
     double start = -(real_cube_size- cube_size)*0.5;
     for (int i = 0; i < meshCount; ++i)
-      meshes[i].move(Eigen::Vector3d(start, start, start));
+      meshes[i].translate(Eigen::Vector3d(start, start, start));
 
 
     counter++;

@@ -20,6 +20,7 @@ public:
   void moveToOrigin();
   void boundingBox(double &x, double &x_max, double &y, double &y_max, double &z, double &z_max);
   void boundingBoxSize(double &x, double &y, double &z);
+  void translate(Eigen::Vector3d translation);
 
   void rotate(Eigen::Matrix3d rotation, Eigen::Vector3d about);
   void move(Eigen::Vector3d translation);

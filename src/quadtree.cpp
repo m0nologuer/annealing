@@ -21,7 +21,7 @@ void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3
         for (int i = 0; i < triangle_count; ++i)
           for (int j = 0; j < tree2->triangle_count; ++j)
           {
-            Eigen::Vector3d difference = triangles[i].shortestDistanceTo(tree2->triangles[j]);
+            Eigen::Vector3d difference = triangles[i]->shortestDistanceTo(tree2->triangles[j]);
             if (difference.norm() < min_distance)
             {
               min_distance = difference.norm();
@@ -58,48 +58,44 @@ void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3
   }
 
   QuadtreeNode::QuadtreeNode(std::vector<Triangle*> vertices, Eigen::Vector3d box_min, Eigen::Vector3d box_max){
-
-    cout << vertices.size() << endl;
-    cout << box_min(0) << " " << box_min(1) << " " << box_min(2) << " " << endl;
-    cout << box_max(0) << " " << box_max(1) << " " << box_max(2) << " " << endl;
-
     bounding_box_min = box_min;
     bounding_box_max = box_max;
+    Eigen::Vector3d medium = (bounding_box_min+bounding_box_max)*0.5;
 
-    if (fabs((box_max-box_min).norm()) < 1e-13)
+    bool can_subdivide = true;
+
+    for (int i = 0; i < vertices.size(); ++i)
     {
-      cerr << "in QuadtreeNode::QuadtreeNode(): numerical precision error" << endl;
-      return;
+      int node_index = comparison_index(vertices[i]->points[0], medium);
+      for (int j = 1; j < 3; j++)
+        if (comparison_index(vertices[i]->points[j], medium) != node_index)
+        {
+          can_subdivide = false;
+          break;
+        }
     }
 
-    if (!(vertices.size() > max_triangles_per_leaf ))
+    if (!(vertices.size() > max_triangles_per_leaf ) || !can_subdivide)
     { 
       leaf = true;
       for (int i = 0; i < 8; ++i)
         next_level[i] = NULL;
       triangle_count = vertices.size();
       for (int i = 0; i < vertices.size(); ++i)
-        triangles[i] = *vertices[i];
+        triangles.push_back(vertices[i]);
     }
     else
     {
       leaf = false;
       std::vector<Triangle*> vector_lists[8];
-      Eigen::Vector3d medium = (bounding_box_min+bounding_box_max)*0.5;
       for (int i = 0; i < vertices.size(); ++i)
       {
-        for (int j = 0; j < 3; j++)
-        {
-          int node_index = comparison_index(vertices[i]->points[j], medium);
-          cout << node_index << " " << vertices[i]->points[j](0) << " " << vertices[i]->points[j](1) 
-            << " " << vertices[i]->points[j](2) << endl;
-
-          if (!(std::find(vector_lists[node_index].begin(), vector_lists[node_index].end(), vertices[i])
+        int node_index = comparison_index(vertices[i]->points[0], medium);
+        if (!(std::find(vector_lists[node_index].begin(), vector_lists[node_index].end(), vertices[i])
            != vector_lists[node_index].end())) 
             vector_lists[node_index].push_back(vertices[i]);
-        }
+        
       } 
-      cout << endl;
       for (int i = 0; i < 8; ++i)
       {
         Eigen::Vector3d min, max;
@@ -117,7 +113,6 @@ void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3
       }
     }
   }
-
 Triangle::Triangle(){};
 Triangle::Triangle(Eigen::Vector3d a, Eigen::Vector3d b, Eigen::Vector3d c){
   points[0] = a;
@@ -154,19 +149,19 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
     return distance;
   }
 }
-Eigen::Vector3d Triangle::shortestDistanceTo(Triangle other){
+Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other){
 
-  Eigen::Vector3d distance = shortestDistanceTo(other.points[0]);
+  Eigen::Vector3d distance = shortestDistanceTo(other->points[0]);
   for (int i = 1; i < 3; ++i)
   {
-    Eigen::Vector3d new_dist = shortestDistanceTo(other.points[i]);
+    Eigen::Vector3d new_dist = shortestDistanceTo(other->points[i]);
     if (new_dist.norm() < distance.norm())
       distance = new_dist;
   }
 
   for (int i = 1; i < 3; ++i)
   {
-    Eigen::Vector3d new_dist = other.shortestDistanceTo(points[i]);
+    Eigen::Vector3d new_dist = other->shortestDistanceTo(points[i]);
     if (new_dist.norm() < distance.norm())
       distance = new_dist;
   }

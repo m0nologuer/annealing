@@ -80,6 +80,7 @@ void Mesh::concatenate(Mesh* meshArray, int mesh_count, Mesh* out_mesh){
 
 }
 
+
 void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closest_object){
   Eigen::Vector3d midPoint = (current_center+prev_center)*0.5;
   Eigen::Vector3d rotation_axis = (vector_to_closest_object).cross(prev_center-current_center);
@@ -90,7 +91,7 @@ void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closes
     rotation_axis.normalize();
   double max_distance_to_midpoint = (current_center-midPoint).norm() + boundingSphere;
 
-  double angle = asin(max_rotation/max_distance_to_midpoint)*2;
+  double angle = asin(max_rotation/(2*max_distance_to_midpoint))*2;
 
   if (angle == angle)
     rotate(Eigen::AngleAxisd(angle, rotation_axis)*Eigen::Scaling(1.0), midPoint);
@@ -100,6 +101,15 @@ void Mesh::rotate(Eigen::Matrix3d rotation, Eigen::Vector3d about)
 {
   for (int i = 0; i < vertex_count; ++i)
     vertexBuffer[i] = rotation*(vertexBuffer[i]-about)+about ;
+}
+
+void Mesh::translate(Eigen::Vector3d translation)
+{
+  prev_center += translation;
+  current_center+= translation;
+
+  for (int i = 0; i < vertex_count; ++i)
+    vertexBuffer[i] += translation;
 }
 
 void Mesh::move(Eigen::Vector3d translation)

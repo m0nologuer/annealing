@@ -21,7 +21,7 @@ public:
   Triangle();
   Triangle(Eigen::Vector3d a, Eigen::Vector3d b, Eigen::Vector3d c);
   Triangle( const Triangle& other );
-  Eigen::Vector3d shortestDistanceTo(Triangle other);
+  Eigen::Vector3d shortestDistanceTo(Triangle* other);
   Eigen::Vector3d shortestDistanceTo(Eigen::Vector3d point);
 };
 
