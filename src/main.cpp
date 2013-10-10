@@ -59,7 +59,7 @@ int main (int argc, char *argv[]) {
       meshes[i].update();
       
       //find closest distance
-      Eigen::Vector3d vector_to_closest_object = meshes[i].smallestVectorToCube(cube_size);
+      Eigen::Vector3d vector_to_closest_object = -meshes[i].smallestVectorToCube(cube_size);
       double closest_distance = vector_to_closest_object.norm();
 
       for (int j = 0; j < meshCount; ++j)
