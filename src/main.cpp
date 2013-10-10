@@ -7,11 +7,11 @@
 
 #define GAP 3.0
 #define PADDING 50.0f
-#define PERCENT_TRANSLATION 0.25f
-#define PERCENT_ROTATION 0.35f
+#define PERCENT_TRANSLATION 0.35f
+#define PERCENT_ROTATION 0.25f
 #define ITERATIONS 400
 #define SPACING 20
-#define CUBE_SHRINKAGE_RATE 0.01
+#define CUBE_SHRINKAGE_RATE 0.005
 #define CONST_PI 3.14
 
 using namespace std;
@@ -53,8 +53,11 @@ int main (int argc, char *argv[]) {
 
   do
   {
+
     for (int i = 0; i < meshCount; ++i)
     {
+      meshes[i].update();
+      
       //find closest distance
       Eigen::Vector3d vector_to_closest_object = meshes[i].smallestVectorToCube(cube_size);
       double closest_distance = vector_to_closest_object.norm();
@@ -68,7 +71,7 @@ int main (int argc, char *argv[]) {
       double rotation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_ROTATION;
 
       meshes[i].rotateLessThan(rotation_distance,vector_to_closest_object);
-      meshes[i].move(vector_to_closest_object*translation_distance/closest_distance);
+      meshes[i].move(vector_to_closest_object*(translation_distance)/closest_distance);
     }
     
     //adjust cube

@@ -12,7 +12,7 @@ int QuadtreeNode::comparison_index(Eigen::Vector3d vertex, Eigen::Vector3d mediu
         node_index += 1;
     return node_index;
 }
-void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3d& min_vector){
+void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3d& min_vector, Eigen::Vector3d& closest_point){
     if (leaf)
     {
       if (tree2->leaf)
@@ -21,18 +21,20 @@ void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3
         for (int i = 0; i < triangle_count; ++i)
           for (int j = 0; j < tree2->triangle_count; ++j)
           {
-            Eigen::Vector3d difference = triangles[i]->shortestDistanceTo(tree2->triangles[j]);
+            Eigen::Vector3d close_point;
+            Eigen::Vector3d difference = triangles[i]->shortestDistanceTo(tree2->triangles[j], close_point);
             if (difference.norm() < min_distance)
             {
               min_distance = difference.norm();
               min_vector = difference;
+              closest_point = close_point;
             }
           }
       }
       else
       {
         for (int i = 0; i < 8; ++i)
-          updateShortestDistanceTo(tree2->next_level[i], min_vector);
+          updateShortestDistanceTo(tree2->next_level[i], min_vector, closest_point);
       }
     }
     else
@@ -40,12 +42,12 @@ void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3
       if (tree2->leaf)
       {
         for (int i = 0; i < 8; ++i)
-          next_level[i]->updateShortestDistanceTo(tree2, min_vector);
+          next_level[i]->updateShortestDistanceTo(tree2, min_vector, closest_point);
       }
       else
       {
         for (int i = 0; i < 8; ++i)
-          next_level[i]->updateShortestDistanceTo(tree2->next_level[i], min_vector);
+          next_level[i]->updateShortestDistanceTo(tree2->next_level[i], min_vector, closest_point);
       }
 
     }
@@ -135,7 +137,8 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
 
   if (bary1 >= 0 && bary1 <= 1 && bary2 >= 0 && bary2 <= 1)
   {
-    return ((bary1*(points[1]-points[0])-bary2*(points[2]-points[0]))+points[0] - point);
+    Eigen::Vector3d closest_point = (bary1*(points[1]-points[0])-bary2*(points[2]-points[0]))+points[0];
+    return (closest_point - point);
   }
   else
   {
@@ -149,21 +152,28 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
     return distance;
   }
 }
-Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other){
+Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& closest_point){
 
   Eigen::Vector3d distance = shortestDistanceTo(other->points[0]);
+  closest_point = distance + other->points[0];
   for (int i = 1; i < 3; ++i)
   {
     Eigen::Vector3d new_dist = shortestDistanceTo(other->points[i]);
     if (new_dist.norm() < distance.norm())
+    {
       distance = new_dist;
+      closest_point = distance + other->points[i];
+    }
   }
 
   for (int i = 1; i < 3; ++i)
   {
-    Eigen::Vector3d new_dist = other->shortestDistanceTo(points[i]);
+    Eigen::Vector3d new_dist = -other->shortestDistanceTo(points[i]);
     if (new_dist.norm() < distance.norm())
+    {
       distance = new_dist;
+      closest_point = points[i];
+    }
   }
   return distance;
 }

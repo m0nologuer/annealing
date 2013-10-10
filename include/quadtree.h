@@ -21,8 +21,8 @@ public:
   Triangle();
   Triangle(Eigen::Vector3d a, Eigen::Vector3d b, Eigen::Vector3d c);
   Triangle( const Triangle& other );
-  Eigen::Vector3d shortestDistanceTo(Triangle* other);
   Eigen::Vector3d shortestDistanceTo(Eigen::Vector3d point);
+  Eigen::Vector3d shortestDistanceTo(Triangle* other, Eigen::Vector3d& closest_point);
 };
 
 class QuadtreeNode
@@ -39,7 +39,7 @@ class QuadtreeNode
 public:
   QuadtreeNode();
   QuadtreeNode(std::vector<Triangle*> vertices, Eigen::Vector3d box_min, Eigen::Vector3d box_max);
-  void updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3d& min_vector);
+  void updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3d& min_vector, Eigen::Vector3d& closest_point);
   ~QuadtreeNode();
 
   static int comparison_index(Eigen::Vector3d vertex, Eigen::Vector3d medium);

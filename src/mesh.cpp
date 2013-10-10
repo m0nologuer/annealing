@@ -83,7 +83,7 @@ void Mesh::concatenate(Mesh* meshArray, int mesh_count, Mesh* out_mesh){
 
 void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closest_object){
   Eigen::Vector3d midPoint = (current_center+prev_center)*0.5;
-  Eigen::Vector3d rotation_axis = (vector_to_closest_object).cross(prev_center-current_center);
+  Eigen::Vector3d rotation_axis = (vector_to_closest_object).cross(prev_closest_point-current_closest_point);
 
   if (rotation_axis == Eigen::Vector3d(0,0,0))
     return;
@@ -132,12 +132,17 @@ void Mesh::buildQuadtree(QuadtreeNode** out_tree, double cube_size){
 
 }
 
+void Mesh::update()
+{
+  prev_closest_point = current_closest_point;
+}
+
 void Mesh::updateMinDistance(Mesh* secondMesh, double cube_size, double& distance, Eigen::Vector3d& vector_to_closest_object){
 
   QuadtreeNode* tree1; QuadtreeNode* tree2;
   buildQuadtree(&tree1, cube_size);
   secondMesh->buildQuadtree(&tree2, cube_size);
-  tree2->updateShortestDistanceTo(tree1, vector_to_closest_object);
+  tree2->updateShortestDistanceTo(tree1, vector_to_closest_object, current_closest_point);
   delete tree1;
   delete tree2;
  /*
@@ -191,6 +196,16 @@ Eigen::Vector3d Mesh::smallestVectorToCube(double cube_size){
   updateMinVector(cube_size-a, Eigen::Vector3d(1,0,0), min_distance, shortest_vector);
   updateMinVector(cube_size-b, Eigen::Vector3d(0,1,0), min_distance, shortest_vector);
   updateMinVector(cube_size-c, Eigen::Vector3d(0,0,1), min_distance, shortest_vector);
+
+  float greatest_dist = vertexBuffer[0].dot(-shortest_vector);
+  for (int i = 0; i < vertex_count; ++i)
+  {
+    if (vertexBuffer[i].dot(-shortest_vector) > greatest_dist)
+    {
+      current_closest_point = vertexBuffer[i]+ shortest_vector;
+      greatest_dist = vertexBuffer[i].dot(-shortest_vector);
+    }
+  }
 
   return shortest_vector;
 }
@@ -328,6 +343,9 @@ void Mesh::meshFromFile(char* filename, Mesh* out_mesh){
   out_mesh->current_center = (Eigen::Vector3d(x,y,z)+Eigen::Vector3d(a,b,c))*0.5;
   out_mesh->prev_center = Eigen::Vector3d(0,0,-1) + out_mesh->current_center;
   out_mesh->boundingSphere = (out_mesh->current_center-Eigen::Vector3d(x,y,z)).norm();
+
+  out_mesh->current_closest_point = out_mesh->vertexBuffer[0];
+  out_mesh->prev_closest_point = out_mesh->vertexBuffer[0];
 
 /////////////////////////////////////////////////////////
 }
