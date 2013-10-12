@@ -28,7 +28,7 @@ public:
   void rotate(Eigen::Matrix3d rotation, Eigen::Vector3d about);
   void move(Eigen::Vector3d translation);
 
-  void buildQuadtree(QuadtreeNode** out_tree, double cube_size);
+  void buildQuadtree(QuadtreeNode** out_tree, double cube_size, std::vector<Triangle*>& vertex_list);
   void updateMinDistance(Mesh* secondMesh, double cube_size, double& distance, Eigen::Vector3d& vector_to_closest_object);
   void rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closest_object);
   Eigen::Vector3d smallestVectorToCube(double cube_size);

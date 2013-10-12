@@ -6,11 +6,11 @@
 #include "mesh.h"
 
 #define GAP 4.0
-#define PADDING 50.0f
-#define PERCENT_TRANSLATION 0.35f
-#define PERCENT_ROTATION 0.25f
-#define ITERATIONS 100
-#define SPACING 20
+#define PADDING 100.0f
+#define PERCENT_TRANSLATION 0.05f
+#define PERCENT_ROTATION 0.04f
+#define ITERATIONS 50
+#define SPACING 60
 #define CUBE_SHRINKAGE_RATE 0.01
 #define CONST_PI 3.14
 
@@ -66,6 +66,11 @@ int main (int argc, char *argv[]) {
         if (i != j)
           meshes[i].updateMinDistance(&meshes[j], cube_size, closest_distance, vector_to_closest_object);
 
+      closest_distance = vector_to_closest_object.norm();
+      if (closest_distance < GAP)
+        cout << "DANGER DANGER" << endl;
+
+      cout << closest_distance << endl;
       //rotate and translate
       double translation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_TRANSLATION;
       double rotation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_ROTATION;

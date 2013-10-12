@@ -12,7 +12,38 @@ int QuadtreeNode::comparison_index(Eigen::Vector3d vertex, Eigen::Vector3d mediu
         node_index += 1;
     return node_index;
 }
+double interval_distance(double x_start, double x_end, double y_start, double y_end)
+{
+  if (x_start > y_start)
+  {
+    // in the interval
+    if (y_end > x_start)
+      return 0;
+    else
+      return x_start - y_end;
+  }
+  else
+  {
+    if (x_end > y_start)
+      return 0;
+    else
+      return y_start- x_end;
+
+  }
+}
+double boundingBoxDistance(Eigen::Vector3d min1, Eigen::Vector3d min2, Eigen::Vector3d max1, Eigen::Vector3d max2)
+{
+  double x = interval_distance(min1(0), max1(0), min2(0), max2(0));
+  double y = interval_distance(min1(1), max1(1), min2(1), max2(1));
+  double z = interval_distance(min1(2), max1(2), min2(2), max2(2));
+
+  return (Eigen::Vector3d(x,y,z)).norm();
+}
 void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3d& min_vector, Eigen::Vector3d& closest_point){
+  
+  //if (boundingBoxDistance(bounding_box_min, tree2->bounding_box_min, bounding_box_max, tree2->bounding_box_max) > min_vector.norm())
+    //return;
+
     if (leaf)
     {
       if (tree2->leaf)
@@ -176,7 +207,7 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
   double edge2 = (point-points[1]).dot((points[2]-points[1]).normalized());
   double edge3 = (point-points[2]).dot((points[0]-points[2]).normalized());
 
-  if (bary1 >= 0 && bary1 <= 1 && bary2 >= 0 && bary2 <= 1)
+  if (bary1 >= -0.05 && bary1 <= 1.05 && bary2 >= -0.05 && bary2 <= 1.05)
   {
     Eigen::Vector3d closest_point = (bary1*(points[1]-points[0])-bary2*(points[2]-points[0]))+points[0];
     return (closest_point - point);
@@ -209,6 +240,8 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
   }
 }
 Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& closest_point){
+
+
 
   Eigen::Vector3d distance = shortestDistanceTo(other->points[0]);
   closest_point = distance + other->points[0];

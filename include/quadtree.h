@@ -10,7 +10,7 @@
 
 using namespace std; 
 
-#define max_triangles_per_leaf 5
+#define max_triangles_per_leaf 30
 #define BIG_DOUBLE 1000000.0
 
 class Triangle

@@ -95,7 +95,7 @@ void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closes
   double angle = asin(max_rotation/(2*max_distance_to_midpoint))*2;
 
   if (angle == angle)
-    rotate(Eigen::AngleAxisd(-angle, rotation_axis)*Eigen::Scaling(1.0), midPoint);
+    rotate(Eigen::AngleAxisd(angle, rotation_axis)*Eigen::Scaling(1.0), midPoint);
 
 }
 void Mesh::rotate(Eigen::Matrix3d rotation, Eigen::Vector3d about)
@@ -121,8 +121,7 @@ void Mesh::move(Eigen::Vector3d translation)
   for (int i = 0; i < vertex_count; ++i)
     vertexBuffer[i] += translation;
 }
-void Mesh::buildQuadtree(QuadtreeNode** out_tree, double cube_size){
-  std::vector<Triangle*> vertex_list;
+void Mesh::buildQuadtree(QuadtreeNode** out_tree, double cube_size, std::vector<Triangle*>& vertex_list){
   for (int i = 0; i < face_count; ++i)
   {
     vertex_list.push_back(new Triangle(vertexBuffer[indexBuffer[3*i]-1],vertexBuffer[indexBuffer[3*i+1]-1],
@@ -140,14 +139,65 @@ void Mesh::update()
 
 void Mesh::updateMinDistance(Mesh* secondMesh, double cube_size, double& distance, Eigen::Vector3d& vector_to_closest_object){
 
+
+  std::vector<Triangle*> temp_list_1,temp_list_2;
+  
   QuadtreeNode* tree1; QuadtreeNode* tree2;
-  buildQuadtree(&tree1, cube_size);
-  secondMesh->buildQuadtree(&tree2, cube_size);
+  buildQuadtree(&tree1, cube_size, temp_list_1);
+  secondMesh->buildQuadtree(&tree2, cube_size,temp_list_2);
   tree2->updateShortestDistanceTo(tree1, vector_to_closest_object, current_closest_point);
+
+  for (int i = 0; i < temp_list_1.size(); ++i)
+    delete temp_list_1[i];
+
+  for (int i = 0; i < temp_list_2.size(); ++i)
+    delete temp_list_2[i];
+
   delete tree1;
   delete tree2;
- /*
-  double dist_squared = distance* distance;
+  
+
+ 
+
+  /*
+
+  std::vector<Triangle*> vertex_list;
+  for (int i = 0; i < face_count; ++i)
+  {
+    vertex_list.push_back(new Triangle(vertexBuffer[indexBuffer[3*i]-1],vertexBuffer[indexBuffer[3*i+1]-1],
+      vertexBuffer[indexBuffer[3*i+2]-1]));
+  }
+
+  std::vector<Triangle*> vertex_list_2;
+  for (int i = 0; i < face_count; ++i)
+  {
+    vertex_list_2.push_back(new Triangle(secondMesh->vertexBuffer[secondMesh->indexBuffer[3*i]-1],secondMesh->vertexBuffer[secondMesh->indexBuffer[3*i+1]-1],
+      secondMesh->vertexBuffer[secondMesh->indexBuffer[3*i+2]-1]));
+  }
+
+  for (int i = 0; i < vertex_list.size(); ++i)
+  {
+    for (int j = 0; j < vertex_list_2.size(); ++j)
+    {
+        Eigen::Vector3d possible_close_point;
+        Eigen::Vector3d short_distance = vertex_list_2[j]->shortestDistanceTo(vertex_list[i], possible_close_point);
+        if (short_distance.norm() < vector_to_closest_object.norm())
+        {
+
+          vector_to_closest_object = short_distance;
+          current_closest_point = possible_close_point;
+        }
+
+    }
+  }
+
+  for (int i = 0; i < vertex_list.size(); ++i)
+    delete[] vertex_list[i];
+
+  for (int i = 0; i < vertex_list_2.size(); ++i)
+    delete[] vertex_list_2[i];
+
+   double dist_squared = distance* distance;
 
   for (int i = 0; i < vertex_count; ++i)
     for (int j = 0; j < secondMesh->vertex_count; ++j)
