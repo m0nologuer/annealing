@@ -5,12 +5,12 @@
 #include <string>
 #include "mesh.h"
 
-#define GAP 4.0
+#define GAP 0.4
 #define PADDING 100.0f
-#define PERCENT_TRANSLATION 0.05f
-#define PERCENT_ROTATION 0.04f
+#define PERCENT_TRANSLATION 0.2f
+#define PERCENT_ROTATION 0.3f
 #define ITERATIONS 50
-#define SPACING 60
+#define SPACING 20
 #define CUBE_SHRINKAGE_RATE 0.01
 #define CONST_PI 3.14
 
@@ -25,30 +25,30 @@ int main (int argc, char *argv[]) {
     Mesh::meshFromFile(argv[i], &meshes[i-1]);
 
   //intital placement,start by stacking them on top of each other at hapharzrd rotations
-  double x_coord, y_coord, z_coord = GAP;
-  z_coord += PADDING;
-
+  double x_coord, y_coord, z_coord = SPACING*2;
   for (int i = 0; i < meshCount; ++i)
   {
-    Eigen::Vector3d random_direction((rand()%100)*0.01,(rand()%100)*0.01,(rand()%100)*0.01);
-    random_direction.normalize();
-    meshes[i].rotate(Eigen::AngleAxisd((rand()%100)*0.01*CONST_PI, random_direction)*Eigen::Scaling(1.0), Eigen::Vector3d(0,0,0));
-  
     meshes[i].moveToOrigin();
     double x,y,z;
     meshes[i].boundingBoxSize(x,y,z);
-    meshes[i].move(Eigen::Vector3d(GAP+ PADDING,GAP+PADDING,z_coord));
 
-    x_coord = max(x, x_coord);
-    y_coord = max(y, x_coord);
-    z_coord += (z+GAP+SPACING);
+    x_coord = max(x + SPACING*2, x_coord);
+    y_coord = max(y + SPACING*2, y_coord);
+    z_coord = max(z + SPACING*2, z_coord);
+  }
+  int cube_count = (int)cbrtf((float)meshCount)+1;
+  for (int i = 0; i < meshCount; ++i){
+    int x = i%cube_count;
+    int y = (i/cube_count)%cube_count;
+    int z = (i/(cube_count*cube_count))%cube_count;
+    meshes[i].translate(Eigen::Vector3d(x*x_coord + PADDING, y*y_coord + PADDING ,z*z_coord + PADDING));
   }
 
   Mesh finalMesh;
   Mesh::concatenate(meshes, meshCount, &finalMesh);
   finalMesh.write("output_start.obj");
 
-  double cube_size = max(x_coord+2.0f*(PADDING+GAP), max(y_coord+2.0f*(PADDING+GAP), z_coord+PADDING*3));
+  double cube_size = max(x_coord*cube_count+2.0f*(PADDING+GAP), max(y_coord*cube_count+2.0f*(PADDING+GAP), z_coord*cube_count+PADDING*3));
   int counter = 0;
 
   do
@@ -67,16 +67,17 @@ int main (int argc, char *argv[]) {
           meshes[i].updateMinDistance(&meshes[j], cube_size, closest_distance, vector_to_closest_object);
 
       closest_distance = vector_to_closest_object.norm();
-      if (closest_distance < GAP)
-        cout << "DANGER DANGER" << endl;
 
-      cout << closest_distance << endl;
       //rotate and translate
       double translation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_TRANSLATION;
       double rotation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_ROTATION;
 
-      meshes[i].rotateLessThan(rotation_distance,vector_to_closest_object);
-      meshes[i].move(vector_to_closest_object*(translation_distance)/closest_distance);
+      if (closest_distance > GAP)
+      {
+        meshes[i].rotateLessThan(rotation_distance,vector_to_closest_object);
+        meshes[i].move(vector_to_closest_object*(translation_distance)/closest_distance);
+      }
+
     }
     
     //adjust cube

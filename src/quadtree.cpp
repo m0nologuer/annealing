@@ -1,4 +1,5 @@
 #include "quadtree.h"
+#define EPISILON 0.05
 
 int QuadtreeNode::comparison_index(Eigen::Vector3d vertex, Eigen::Vector3d medium)
 {
@@ -175,7 +176,7 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d line_segment_start,
     double u = ((q-p).cross(r)).norm()/(r.cross(s)).norm();
     double t = ((q-p).cross(s)).norm()/(r.cross(s)).norm();
 
-    if (u >= 0 && u <= 1 && t >= 0 && t <= 1)
+    if (u > -EPISILON && u < 1+ EPISILON && t > EPISILON && t < EPISILON)
     {
       Eigen::Vector3d closest_point = q + u*s;
       Eigen::Vector3d mesh_close_point = (line_segment_start*(1-t) + line_segment_end*t);
@@ -207,22 +208,22 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
   double edge2 = (point-points[1]).dot((points[2]-points[1]).normalized());
   double edge3 = (point-points[2]).dot((points[0]-points[2]).normalized());
 
-  if (bary1 >= -0.05 && bary1 <= 1.05 && bary2 >= -0.05 && bary2 <= 1.05)
+  if (bary1 >= -EPISILON && bary1 <= (1+EPISILON) && bary2 >= -EPISILON && bary2 <= (1 + EPISILON))
   {
     Eigen::Vector3d closest_point = (bary1*(points[1]-points[0])-bary2*(points[2]-points[0]))+points[0];
     return (closest_point - point);
   }
-  else if (edge1 >= 0 && edge1 <= 1)
+  else if (edge1 >= -EPISILON && edge1 <= (1+EPISILON))
   {
     Eigen::Vector3d closest_point = edge1*points[1] + (1- edge1)*points[0];
     return closest_point - point;
   }
-  else if (edge2 >= 0 && edge2 <= 1)
+  else if (edge2 >= -EPISILON && edge2 <= (1+EPISILON))
   {
     Eigen::Vector3d closest_point = edge2*points[2] + (1- edge2)*points[1];
     return closest_point - point;
   }
-  else if (edge3 >= 0 && edge3 <= 1)
+  else if (edge3 >= -EPISILON && edge3 <= (1+EPISILON))
   {
     Eigen::Vector3d closest_point = edge3*points[0] + (1- edge3)*points[2];
     return closest_point - point;
