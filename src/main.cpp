@@ -5,11 +5,11 @@
 #include <string>
 #include "mesh.h"
 
-#define GAP 0.4
+#define GAP 3.0
 #define PADDING 100.0f
-#define PERCENT_TRANSLATION 0.2f
-#define PERCENT_ROTATION 0.3f
-#define ITERATIONS 50
+#define PERCENT_TRANSLATION 0.6f
+#define PERCENT_ROTATION 0.2f
+#define ITERATIONS 10000
 #define SPACING 20
 #define CUBE_SHRINKAGE_RATE 0.01
 #define CONST_PI 3.14
@@ -28,6 +28,10 @@ int main (int argc, char *argv[]) {
   double x_coord, y_coord, z_coord = SPACING*2;
   for (int i = 0; i < meshCount; ++i)
   {
+    Eigen::Vector3d random_vector((rand()%100)*0.01,(rand()%100)*0.01,(rand()%100)*0.01);
+    random_vector.normalize();
+    double random_angle = (rand()%100)*0.0628;
+    meshes[i].rotate(Eigen::AngleAxisd(-random_angle, random_vector)*Eigen::Scaling(1.0), Eigen::Vector3d(0,0,0));
     meshes[i].moveToOrigin();
     double x,y,z;
     meshes[i].boundingBoxSize(x,y,z);
@@ -50,9 +54,11 @@ int main (int argc, char *argv[]) {
 
   double cube_size = max(x_coord*cube_count+2.0f*(PADDING+GAP), max(y_coord*cube_count+2.0f*(PADDING+GAP), z_coord*cube_count+PADDING*3));
   int counter = 0;
+  bool still_moving = false;
 
   do
   {
+    still_moving = false;
 
     for (int i = 0; i < meshCount; ++i)
     {
@@ -67,15 +73,20 @@ int main (int argc, char *argv[]) {
           meshes[i].updateMinDistance(&meshes[j], cube_size, closest_distance, vector_to_closest_object);
 
       closest_distance = vector_to_closest_object.norm();
-
       //rotate and translate
       double translation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_TRANSLATION;
       double rotation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_ROTATION;
 
+
+      cout << i << " " << closest_distance <<  " trans:" << translation_distance << " rotat:" << rotation_distance << endl;
+      assert(!(closest_distance < GAP));
+
       if (closest_distance > GAP)
       {
+        still_moving = true;
         meshes[i].rotateLessThan(rotation_distance,vector_to_closest_object);
-        meshes[i].move(vector_to_closest_object*(translation_distance)/closest_distance);
+        Eigen::Vector3d movement_direction = vector_to_closest_object.normalized();
+        meshes[i].move(movement_direction*translation_distance);
       }
 
     }
@@ -98,8 +109,14 @@ int main (int argc, char *argv[]) {
       meshes[i].translate(Eigen::Vector3d(start, start, start));
 
 
+          Mesh m;
+  Mesh::concatenate(meshes, meshCount, &m);
+  m.write("output_file.obj");
+
+
+
     counter++;
-  } while (counter < ITERATIONS);
+  } while (counter < ITERATIONS && still_moving);
 
   Mesh::concatenate(meshes, meshCount, &finalMesh);
   finalMesh.write("output_file.obj");

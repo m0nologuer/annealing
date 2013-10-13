@@ -3,6 +3,13 @@ Annealing
 Usage: ./anneal file1.obj file2.obj 
 The output file is written to output_file.obj
 
+Issues
+=========
+One remaining issue is intersecting meshes. There are two causes to this problem so far identified 
+- one, the quadtree is structured wrong somehow, that it is missing some of the smallest distances.
+- two, the rotation step is moving pieces slightly further than they should for some reason
+The quadtree has been temporarily disabled.
+
 Defines
 ========
 
