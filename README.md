@@ -8,6 +8,7 @@ Issues
 One remaining issue is intersecting meshes. There are two causes to this problem so far identified 
 -  the quadtree is structured wrong somehow, that it is missing some of the smallest distances.
 The quadtree has been temporarily disabled.
+- something is wrong with the rotation step
 
 Defines
 ========
