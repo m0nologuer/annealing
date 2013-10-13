@@ -242,8 +242,6 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
 }
 Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& closest_point){
 
-
-
   Eigen::Vector3d distance = shortestDistanceTo(other->points[0]);
   closest_point = distance + other->points[0];
 
@@ -279,7 +277,7 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& c
     }
   }
 
-  /*
+  
   for (int i = 0; i < 3; ++i)
   {
     Eigen::Vector3d close_point;
@@ -289,7 +287,7 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& c
       distance = new_dist;
       closest_point = close_point;
     }
-  }*/
+  }
 
   return distance;
 }

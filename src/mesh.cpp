@@ -91,15 +91,18 @@ void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closes
   else
     rotation_axis.normalize();
 
-  double max_distance_to_midpoint = (current_center-midPoint).norm() + boundingSphere;
+  double max_distance_to_midpoint = (current_center-midPoint).norm() + boundingSphere*2;
 /*
   for (int i = 0; i < vertex_count; ++i)
   {
     double distance_to_midpoint = (vertexBuffer[i]-midPoint).norm();
     if (distance_to_midpoint > max_distance_to_midpoint)
+    {
+      cout << (current_center-midPoint).norm() << " " << boundingSphere << " " << max_distance_to_midpoint << endl;
       max_distance_to_midpoint = distance_to_midpoint;
-  }*/
-
+    }
+  }
+*/
   double angle = asin(max_rotation/(2*max_distance_to_midpoint))*2;
 
   if (angle == angle)
@@ -411,7 +414,9 @@ void Mesh::write(char* out_file){
   ofstream stream(out_file);
 
   for (int i = 0; i < vertex_count; ++i)
+  {
     stream << "v " << vertexBuffer[i](0) << " " << vertexBuffer[i](1) << " "<< vertexBuffer[i](2) << endl;
+  }
 
   for (int i = 0; i < face_count; ++i)
     stream << "f " << indexBuffer[3*i] << " " << indexBuffer[3*i+1] << " "<< indexBuffer[3*i+2] << endl;

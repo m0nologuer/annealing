@@ -8,16 +8,16 @@
 #define GAP 1.0
 #define PADDING 100.0f
 #define PERCENT_TRANSLATION 0.1f
-#define PERCENT_ROTATION 0.1f
+#define PERCENT_ROTATION 0.3f
 #define ITERATIONS 10000
 #define SPACING 20
-#define CUBE_SHRINKAGE_RATE 0.01
+#define CUBE_SHRINKAGE_RATE 0.001
 #define CONST_PI 3.14
 
 using namespace std;
 
 int main (int argc, char *argv[]) {
-  
+
   int meshCount = argc-1;
 
   Mesh * meshes = new Mesh[meshCount];
@@ -109,11 +109,9 @@ int main (int argc, char *argv[]) {
       meshes[i].translate(Eigen::Vector3d(start, start, start));
 
 
-          Mesh m;
-  Mesh::concatenate(meshes, meshCount, &m);
-  m.write("output_file.obj");
-
-
+    Mesh m;
+    Mesh::concatenate(meshes, meshCount, &m);
+    m.write("output_file.obj");
 
     counter++;
   } while (counter < ITERATIONS && still_moving);
