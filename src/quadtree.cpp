@@ -1,5 +1,5 @@
 #include "quadtree.h"
-#define EPISILON 0.05
+#define EPISILON 0.005
 
 int QuadtreeNode::comparison_index(Eigen::Vector3d vertex, Eigen::Vector3d medium)
 {
@@ -218,10 +218,10 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
   Eigen::Vector3d v2 = projected_point-points[0];
 
   // Compute dot products
-  double dot00 = v0.norm();
+  double dot00 = v0.dot(v0);
   double dot01 = v0.dot(v1);
   double dot02 = v0.dot(v2);
-  double dot11 = v1.norm();
+  double dot11 = v1.dot(v1);
   double dot12 = v1.dot(v2);
 
 // Compute barycentric coordinates
