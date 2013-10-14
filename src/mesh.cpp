@@ -11,7 +11,6 @@ Mesh::Mesh(){
   boundingSphere = 0;
 
 }
-
 void Mesh::moveToOrigin(){
   if (!vertexBuffer)
     return;

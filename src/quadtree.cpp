@@ -1,5 +1,5 @@
 #include "quadtree.h"
-#define EPISILON 0.05
+#define EPISILON 0.005
 
 int QuadtreeNode::comparison_index(Eigen::Vector3d vertex, Eigen::Vector3d medium)
 {
@@ -159,6 +159,7 @@ Triangle::Triangle( const Triangle& other ){
   for (int i = 0; i < 3; ++i)
     points[i] = other.points[i];
 }
+//line triangle intersections
 Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d line_segment_start, Eigen::Vector3d line_segment_end, Eigen::Vector3d& mesh_closest_point)
 {
   Eigen::Vector3d shortest_dist(BIG_DOUBLE,BIG_DOUBLE,BIG_DOUBLE);
@@ -176,10 +177,11 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d line_segment_start,
     double u = ((q-p).cross(r)).norm()/(r.cross(s)).norm();
     double t = ((q-p).cross(s)).norm()/(r.cross(s)).norm();
 
-    if (u > -EPISILON && u < 1+ EPISILON && t > EPISILON && t < EPISILON)
+
+    if (u > -EPISILON && u < 1+ EPISILON && t > -EPISILON && t < 1+EPISILON)
     {
       Eigen::Vector3d closest_point = q + u*s;
-      Eigen::Vector3d mesh_close_point = (line_segment_start*(1-t) + line_segment_end*t);
+      Eigen::Vector3d mesh_close_point = (line_segment_start*t + line_segment_end*(1-t));
       Eigen::Vector3d short_distance = mesh_close_point - closest_point;
 
       if (short_distance.norm() < shortest_dist.norm())
@@ -192,25 +194,35 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d line_segment_start,
   }
   return shortest_dist;
 }
-
+//point triangle intersections
 Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
 
   //use barycentric coordinates to find shortest distance from a triangle to a point
+  Eigen::Vector3d v0 = points[2]-points[0];
+  Eigen::Vector3d v1 = points[1]-points[0];
+  Eigen::Vector3d v2 = point-points[0];
 
-  Eigen::Vector3d projected_point = point - points[0];
-  double bary1 = projected_point.dot((points[1]-points[0]).normalized());
+  // Compute dot products
+  double dot00 = v0.norm();
+  double dot01 = v0.dot(v1);
+  double dot02 = v0.dot(v2);
+  double dot11 = v1.norm();
+  double dot12 = v1.dot(v2);
 
-  projected_point = projected_point - bary1*(points[1]-points[0]);
-  double bary2 = projected_point.dot((points[2]-points[0]).normalized());
+// Compute barycentric coordinates
+  double invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
+  double u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+  double v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
   //project point onto all three edges
   double edge1 = (point-points[0]).dot((points[1]-points[0]).normalized());
   double edge2 = (point-points[1]).dot((points[2]-points[1]).normalized());
   double edge3 = (point-points[2]).dot((points[0]-points[2]).normalized());
 
-  if (bary1 >= -EPISILON && bary1 <= (1+EPISILON) && bary2 >= -EPISILON && bary2 <= (1 + EPISILON))
+  // Check if point is in triangle
+  if  ((u >= -EPISILON) && (v >= -EPISILON) && (u + v < 1+ EPISILON))
   {
-    Eigen::Vector3d closest_point = (bary1*(points[1]-points[0])-bary2*(points[2]-points[0]))+points[0];
+    Eigen::Vector3d closest_point = points[0] + u * (points[1] - points[0]) + v * (points[2]-points[0]);
     return (closest_point - point);
   }
   else if (edge1 >= -EPISILON && edge1 <= (1+EPISILON))
@@ -276,18 +288,18 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& c
       closest_point = close_point;
     }
   }
-
+/*
   
   for (int i = 0; i < 3; ++i)
   {
     Eigen::Vector3d close_point;
-    Eigen::Vector3d new_dist =  -other->shortestDistanceTo(points[i],points[(i+1)%3], close_point);
+    Eigen::Vector3d new_dist = -other->shortestDistanceTo(points[i],points[(i+1)%3], close_point);
     if (new_dist.norm() < distance.norm())
     {
       distance = new_dist;
       closest_point = close_point;
     }
-  }
+  }*/
 
   return distance;
 }

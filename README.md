@@ -5,10 +5,12 @@ The output file is written to output_file.obj
 
 Issues
 =========
-One remaining issue is intersecting meshes. There are two causes to this problem so far identified 
--  the quadtree is structured wrong somehow, that it is missing some of the smallest distances.
-The quadtree has been temporarily disabled.
-- something is wrong with the rotation step
+One remaining issue is intersecting meshes. This problem is most likely caused by an error in the triangle-triangle smallest distance algorithm.
+
+Possible Improvements
+=======
+After testing, it seems that gradually reducing the minimum gap between shapes could help stop the clumping (if slower annealing doesn't work)
+It might also be a good idea to set a nonlinear function to determine how far an object should be translated/ rotated, so it moves a lot if it very far away from another object, but moves a smaller percentage of that distance if it is closer.
 
 Defines
 ========
