@@ -181,7 +181,7 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d line_segment_start,
     if (u > -EPISILON && u < 1+ EPISILON && t > -EPISILON && t < 1+EPISILON)
     {
       Eigen::Vector3d closest_point = q + u*s;
-      Eigen::Vector3d mesh_close_point = (line_segment_start*t + line_segment_end*(1-t));
+      Eigen::Vector3d mesh_close_point = (line_segment_start*(1-t) + line_segment_end*t);
       Eigen::Vector3d short_distance = mesh_close_point - closest_point;
 
       if (short_distance.norm() < shortest_dist.norm())
@@ -194,13 +194,28 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d line_segment_start,
   }
   return shortest_dist;
 }
+void update_shortest_distance(Eigen::Vector3d new_dist, Eigen::Vector3d& old_dist){
+  if (old_dist.norm() > new_dist.norm())
+    old_dist = new_dist;
+}
 //point triangle intersections
 Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
 
+   //first go through vertices and pick the cloests.
+  Eigen::Vector3d distance = points[0] - point;
+  for (int i = 1; i < 3; ++i)
+  {
+    Eigen::Vector3d new_dist = points[i] - point;
+    update_shortest_distance(new_dist, distance);
+  }
+
   //use barycentric coordinates to find shortest distance from a triangle to a point
+  Eigen::Vector3d normal = ((points[1]-points[0]).cross(points[2]-points[1])).normalized();
+  Eigen::Vector3d projected_point = point - point.dot(normal)*normal;
+
   Eigen::Vector3d v0 = points[2]-points[0];
   Eigen::Vector3d v1 = points[1]-points[0];
-  Eigen::Vector3d v2 = point-points[0];
+  Eigen::Vector3d v2 = projected_point-points[0];
 
   // Compute dot products
   double dot00 = v0.norm();
@@ -219,38 +234,31 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
   double edge2 = (point-points[1]).dot((points[2]-points[1]).normalized());
   double edge3 = (point-points[2]).dot((points[0]-points[2]).normalized());
 
-  // Check if point is in triangle
-  if  ((u >= -EPISILON) && (v >= -EPISILON) && (u + v < 1+ EPISILON))
+
+
+  // Check if projected point is in triangle
+  if  ((u > -EPISILON) && (v > -EPISILON) && (u + v < 1+ EPISILON))
   {
     Eigen::Vector3d closest_point = points[0] + u * (points[1] - points[0]) + v * (points[2]-points[0]);
-    return (closest_point - point);
+    update_shortest_distance((closest_point - point), distance);
   }
-  else if (edge1 >= -EPISILON && edge1 <= (1+EPISILON))
+  if (edge1 > -EPISILON && edge1 < (1+EPISILON))
   {
     Eigen::Vector3d closest_point = edge1*points[1] + (1- edge1)*points[0];
-    return closest_point - point;
+    update_shortest_distance((closest_point - point), distance);
   }
-  else if (edge2 >= -EPISILON && edge2 <= (1+EPISILON))
+  if (edge2 > -EPISILON && edge2 < (1+EPISILON))
   {
     Eigen::Vector3d closest_point = edge2*points[2] + (1- edge2)*points[1];
-    return closest_point - point;
+    update_shortest_distance((closest_point - point), distance);
   }
-  else if (edge3 >= -EPISILON && edge3 <= (1+EPISILON))
+  if (edge3 > -EPISILON && edge3 < (1+EPISILON))
   {
     Eigen::Vector3d closest_point = edge3*points[0] + (1- edge3)*points[2];
-    return closest_point - point;
+    update_shortest_distance((closest_point - point), distance);
   }
-  else // go through vertices and pick the cloests.
-  {
-    Eigen::Vector3d distance = points[0] - point;
-    for (int i = 1; i < 3; ++i)
-    {
-      Eigen::Vector3d new_dist = points[i] - point;
-      if (new_dist.norm() < distance.norm())
-        distance = new_dist;
-    }
-    return distance;
-  }
+  
+  return distance;
 }
 Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& closest_point){
 
@@ -288,8 +296,7 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& c
       closest_point = close_point;
     }
   }
-/*
-  
+  /*
   for (int i = 0; i < 3; ++i)
   {
     Eigen::Vector3d close_point;
@@ -297,7 +304,7 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& c
     if (new_dist.norm() < distance.norm())
     {
       distance = new_dist;
-      closest_point = close_point;
+      closest_point = points[i];
     }
   }*/
 
