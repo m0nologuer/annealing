@@ -91,22 +91,30 @@ void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closes
     rotation_axis.normalize();
 
   double max_distance_to_midpoint = (current_center-midPoint).norm() + boundingSphere*2;
-/*
+
   for (int i = 0; i < vertex_count; ++i)
   {
     double distance_to_midpoint = (vertexBuffer[i]-midPoint).norm();
     if (distance_to_midpoint > max_distance_to_midpoint)
     {
-      cout << (current_center-midPoint).norm() << " " << boundingSphere << " " << max_distance_to_midpoint << endl;
       max_distance_to_midpoint = distance_to_midpoint;
     }
   }
-*/
+
   double angle = asin(max_rotation/(2*max_distance_to_midpoint))*2;
 
-  if (angle == angle)
-    rotate(Eigen::AngleAxisd(-angle, rotation_axis)*Eigen::Scaling(1.0), midPoint);
+  if (angle == angle){
+    for (int i = 0; i < vertex_count; ++i)
+    {
+      Eigen::Vector3d rotated_point = Eigen::AngleAxisd(-angle, rotation_axis)*(vertexBuffer[i]-midPoint)+midPoint;
+      assert((rotated_point-vertexBuffer[i]).norm() < max_rotation);
+      vertexBuffer[i] = rotated_point;
+    }
 
+  }
+  /*if (angle == angle)
+    rotate(Eigen::AngleAxisd(-angle, rotation_axis)*Eigen::Scaling(1.0), midPoint);
+*/
 }
 void Mesh::rotate(Eigen::Matrix3d rotation, Eigen::Vector3d about)
 {
