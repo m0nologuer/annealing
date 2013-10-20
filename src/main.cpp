@@ -11,7 +11,7 @@
 #define PERCENT_ROTATION 0.3f
 #define ITERATIONS 10000
 #define SPACING 10
-#define CUBE_SHRINKAGE_RATE 0.9
+#define CUBE_SHRINKAGE_RATE 0.01
 #define CONST_PI 3.14
 
 using namespace std;
