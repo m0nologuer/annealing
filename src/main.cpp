@@ -6,12 +6,12 @@
 #include "mesh.h"
 
 #define GAP 1.0
-#define PADDING 100.0f
-#define PERCENT_TRANSLATION 0.1f
+#define PADDING 10.0f
+#define PERCENT_TRANSLATION 0.5f
 #define PERCENT_ROTATION 0.3f
 #define ITERATIONS 10000
-#define SPACING 20
-#define CUBE_SHRINKAGE_RATE 0.01
+#define SPACING 10
+#define CUBE_SHRINKAGE_RATE 0.9
 #define CONST_PI 3.14
 
 using namespace std;
@@ -65,7 +65,7 @@ int main (int argc, char *argv[]) {
       meshes[i].update();
       
       //find closest distance
-      Eigen::Vector3d vector_to_closest_object = -meshes[i].smallestVectorToCube(cube_size);
+      Eigen::Vector3d vector_to_closest_object = meshes[i].smallestVectorToCube(cube_size);
       double closest_distance = vector_to_closest_object.norm();
 
       for (int j = 0; j < meshCount; ++j)
@@ -81,15 +81,15 @@ int main (int argc, char *argv[]) {
 
 
       cout << i << " " << closest_distance <<  " trans:" << translation_distance << " rotat:" << rotation_distance << endl;
-      assert(!(closest_distance < GAP));
+      //assert(!(closest_distance < GAP));
 
       if (closest_distance > GAP)
       {
         still_moving = true;
         meshes[i].rotateLessThan(rotation_distance,vector_to_closest_object);
         Eigen::Vector3d movement_direction = vector_to_closest_object.normalized();
-        meshes[i].move(movement_direction*translation_distance);
-      }
+        meshes[i].move(-movement_direction*translation_distance);
+      }      
 
     }
     
