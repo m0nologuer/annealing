@@ -5,13 +5,13 @@
 #include <string>
 #include "mesh.h"
 
-#define GAP 1.0
-#define PADDING 10.0f
-#define PERCENT_TRANSLATION 0.5f
-#define PERCENT_ROTATION 0.3f
+#define GAP 0.1
+#define PADDING 1.0f
+#define PERCENT_TRANSLATION 0.1f
+#define PERCENT_ROTATION 0.2f
 #define ITERATIONS 10000
 #define SPACING 10
-#define CUBE_SHRINKAGE_RATE 0.01
+#define CUBE_SHRINKAGE_RATE 0.7
 #define CONST_PI 3.14
 
 using namespace std;
@@ -81,7 +81,7 @@ int main (int argc, char *argv[]) {
 
 
       cout << i << " " << closest_distance <<  " trans:" << translation_distance << " rotat:" << rotation_distance << endl;
-      //assert(!(closest_distance < GAP));
+      assert(!(closest_distance < GAP));
 
       if (closest_distance > GAP)
       {
@@ -106,6 +106,7 @@ int main (int argc, char *argv[]) {
     }
     double real_cube_size = (cube_min+cube_max)*0.5 + GAP*4;
     cube_size = real_cube_size*CUBE_SHRINKAGE_RATE + cube_size*(1- CUBE_SHRINKAGE_RATE);
+    cout << cube_size << endl;
     double start = -(real_cube_size- cube_size)*0.5;
     for (int i = 0; i < meshCount; ++i)
       meshes[i].translate(Eigen::Vector3d(start, start, start));
