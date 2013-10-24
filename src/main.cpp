@@ -6,9 +6,9 @@
 #include "mesh.h"
 
 #define GAP 1.0
-#define PADDING 10.0f
-#define PERCENT_TRANSLATION 0.6f
-#define PERCENT_ROTATION 0.1f
+#define PADDING 30.0f
+#define PERCENT_TRANSLATION 0.3f
+#define PERCENT_ROTATION 0.5f
 #define ITERATIONS 10000
 #define SPACING 10
 #define CUBE_SHRINKAGE_RATE 0.01
@@ -113,7 +113,7 @@ int main (int argc, char *argv[]) {
       meshes[i].translate(Eigen::Vector3d(start, start, start));
 
 
-   cout << start + cube_min<< " " << cube_min << " " << cube_max << " " << cube_size << " " << real_cube_size << endl;
+   cout <<"cube_size: " << cube_size << " occupied cube size:" << real_cube_size << endl;
 
     Mesh m;
     Mesh::concatenate(meshes, meshCount, &m);

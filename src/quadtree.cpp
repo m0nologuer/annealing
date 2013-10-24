@@ -1,5 +1,5 @@
 #include "quadtree.h"
-#define EPISILON 0.005
+#define EPISILON 0
 
 int QuadtreeNode::comparison_index(Eigen::Vector3d vertex, Eigen::Vector3d medium)
 {
@@ -181,7 +181,7 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d line_segment_start,
     if (u > -EPISILON && u < 1+ EPISILON && t > -EPISILON && t < 1+EPISILON)
     {
       Eigen::Vector3d closest_point = q + u*s;
-      Eigen::Vector3d mesh_close_point = (line_segment_start*(t) + line_segment_end*t);
+      Eigen::Vector3d mesh_close_point = (line_segment_start*(1-t) + line_segment_end*t);
       Eigen::Vector3d short_distance = mesh_close_point - closest_point;
 
       if (short_distance.norm() < shortest_dist.norm())
