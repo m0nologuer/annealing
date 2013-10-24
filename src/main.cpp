@@ -5,13 +5,13 @@
 #include <string>
 #include "mesh.h"
 
-#define GAP 0.1
-#define PADDING 1.0f
-#define PERCENT_TRANSLATION 0.1f
-#define PERCENT_ROTATION 0.2f
+#define GAP 1.0
+#define PADDING 10.0f
+#define PERCENT_TRANSLATION 0.6f
+#define PERCENT_ROTATION 0.1f
 #define ITERATIONS 10000
 #define SPACING 10
-#define CUBE_SHRINKAGE_RATE 0.7
+#define CUBE_SHRINKAGE_RATE 0.01
 #define CONST_PI 3.14
 
 using namespace std;
@@ -52,7 +52,7 @@ int main (int argc, char *argv[]) {
   Mesh::concatenate(meshes, meshCount, &finalMesh);
   finalMesh.write("output_start.obj");
 
-  double cube_size = max(x_coord*cube_count+2.0f*(PADDING+GAP), max(y_coord*cube_count+2.0f*(PADDING+GAP), z_coord*cube_count+PADDING*3));
+  double cube_size = max(x_coord*cube_count+2.0f*(PADDING+GAP*2), max(y_coord*cube_count+2.0f*(PADDING+GAP*2), z_coord*cube_count+PADDING*3));
   int counter = 0;
   bool still_moving = false;
 
@@ -74,13 +74,12 @@ int main (int argc, char *argv[]) {
 
       closest_distance = vector_to_closest_object.norm();
 
-
       //rotate and translate
       double translation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_TRANSLATION;
       double rotation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_ROTATION;
 
-
       cout << i << " " << closest_distance <<  " trans:" << translation_distance << " rotat:" << rotation_distance << endl;
+
       assert(!(closest_distance < GAP));
 
       if (closest_distance > GAP)
@@ -102,15 +101,19 @@ int main (int argc, char *argv[]) {
       double x,y,z,a,b,c;
       meshes[i].boundingBox(a,x,b,y,c,z);
       cube_max = max(x,max(y,max(z,cube_max)));
-      cube_min = max(a,max(b,max(c,cube_min)));
+      cube_min = min(a,min(b,min(c,cube_min)));
     }
-    double real_cube_size = (cube_min+cube_max)*0.5 + GAP*4;
-    cube_size = real_cube_size*CUBE_SHRINKAGE_RATE + cube_size*(1- CUBE_SHRINKAGE_RATE);
-    cout << cube_size << endl;
-    double start = -(real_cube_size- cube_size)*0.5;
+    double real_cube_size = cube_max-cube_min + GAP*2;
+    cube_size = real_cube_size *CUBE_SHRINKAGE_RATE + cube_size*(1- CUBE_SHRINKAGE_RATE);
+    assert(real_cube_size < cube_size);
+    double start = (cube_size-real_cube_size)*0.5 // to center the cube
+                      -cube_min
+                      + GAP; // or just above zero
     for (int i = 0; i < meshCount; ++i)
       meshes[i].translate(Eigen::Vector3d(start, start, start));
 
+
+   cout << start + cube_min<< " " << cube_min << " " << cube_max << " " << cube_size << " " << real_cube_size << endl;
 
     Mesh m;
     Mesh::concatenate(meshes, meshCount, &m);

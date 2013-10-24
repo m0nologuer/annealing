@@ -106,7 +106,7 @@ void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closes
   if (angle == angle){
     for (int i = 0; i < vertex_count; ++i)
     {
-      Eigen::Vector3d rotated_point = Eigen::AngleAxisd(-angle, rotation_axis)*(vertexBuffer[i]-midPoint)+midPoint;
+      Eigen::Vector3d rotated_point = Eigen::AngleAxisd(angle, rotation_axis)*(vertexBuffer[i]-midPoint)+midPoint;
       assert((rotated_point-vertexBuffer[i]).norm() < max_rotation);
       vertexBuffer[i] = rotated_point;
     }
