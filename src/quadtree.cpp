@@ -1,5 +1,5 @@
 #include "quadtree.h"
-#define EPISILON 0
+#define EPISILON 1e-13
 
 int QuadtreeNode::comparison_index(Eigen::Vector3d vertex, Eigen::Vector3d medium)
 {
@@ -166,8 +166,9 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d line_segment_start,
 
   //line intersection with all of the edges
   Eigen::Vector3d normal = ((points[1]-points[0]).cross(points[2]-points[1])).normalized();
-  Eigen::Vector3d p = line_segment_start - line_segment_start.dot(normal)*normal;
-  Eigen::Vector3d r = (line_segment_end - line_segment_end.dot(normal)*normal) - p;
+  float d = points[1].dot(normal);
+  Eigen::Vector3d p = line_segment_start - (line_segment_start.dot(normal) -d)*normal;
+  Eigen::Vector3d r = (line_segment_end - (line_segment_end.dot(normal)-d)*normal) - p;
 
   for (int i = 0; i < 3; ++i)
   {
@@ -176,7 +177,6 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d line_segment_start,
 
     double u = ((q-p).cross(r)).norm()/(r.cross(s)).norm();
     double t = ((q-p).cross(s)).norm()/(r.cross(s)).norm();
-
 
     if (u > -EPISILON && u < 1+ EPISILON && t > -EPISILON && t < 1+EPISILON)
     {
@@ -230,10 +230,9 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
   double v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
   //project point onto all three edges
-  double edge1 = (point-points[0]).dot((points[1]-points[0]).normalized());
-  double edge2 = (point-points[1]).dot((points[2]-points[1]).normalized());
-  double edge3 = (point-points[2]).dot((points[0]-points[2]).normalized());
-
+  double edge1 = (point-points[0]).dot(points[1]-points[0])/(points[1]-points[0]).squaredNorm();
+  double edge2 = (point-points[1]).dot(points[2]-points[1])/(points[2]-points[1]).squaredNorm();
+  double edge3 = (point-points[2]).dot(points[0]-points[2])/(points[0]-points[2]).squaredNorm();
 
 
   // Check if projected point is in triangle
@@ -265,7 +264,7 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& c
   Eigen::Vector3d distance = shortestDistanceTo(other->points[0]);
   closest_point = distance + other->points[0];
 
-  //project all vertices onto other triangle
+  //project other triangle vertices onto us
   for (int i = 1; i < 3; ++i)
   {
     Eigen::Vector3d new_dist = shortestDistanceTo(other->points[i]);
@@ -275,7 +274,8 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& c
       closest_point = distance + other->points[i];
     }
   }
-  //project other triangle vertices onto us
+  
+  //project all vertices onto other triangle
   for (int i = 0; i < 3; ++i)
   {
     Eigen::Vector3d new_dist = -other->shortestDistanceTo(points[i]);
@@ -291,18 +291,18 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& c
   for (int i = 0; i < 3; ++i)
   {
     Eigen::Vector3d close_point;
-    Eigen::Vector3d new_dist = shortestDistanceTo(other->points[i], other->points[(i+1)%3], close_point);
+    Eigen::Vector3d new_dist = -shortestDistanceTo(other->points[i], other->points[(i+1)%3], close_point);
     if (new_dist.norm() < distance.norm())
     {
       distance = new_dist;
       closest_point = close_point;
     }
   }
-  
+
   for (int i = 0; i < 3; ++i)
   {
     Eigen::Vector3d close_point;
-    Eigen::Vector3d new_dist = -other->shortestDistanceTo(points[i],points[(i+1)%3], close_point);
+    Eigen::Vector3d new_dist = other->shortestDistanceTo(points[i],points[(i+1)%3], close_point);
     if (new_dist.norm() < distance.norm())
     {
       distance = new_dist;

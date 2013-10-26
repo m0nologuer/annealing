@@ -6,11 +6,11 @@
 #include "mesh.h"
 
 #define GAP 1.0
-#define PADDING 30.0f
+#define PADDING 40.0f
 #define PERCENT_TRANSLATION 0.3f
-#define PERCENT_ROTATION 0.5f
+#define PERCENT_ROTATION 0.3f
 #define ITERATIONS 10000
-#define SPACING 10
+#define SPACING 5
 #define CUBE_SHRINKAGE_RATE 0.01
 #define CONST_PI 3.14
 
@@ -74,13 +74,15 @@ int main (int argc, char *argv[]) {
 
       closest_distance = vector_to_closest_object.norm();
 
+//       meshes[i].move(vector_to_closest_object);
+
       //rotate and translate
       double translation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_TRANSLATION;
       double rotation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_ROTATION;
 
       cout << i << " " << closest_distance <<  " trans:" << translation_distance << " rotat:" << rotation_distance << endl;
 
-      assert(!(closest_distance < GAP));
+     // assert(!(closest_distance < GAP));
 
       if (closest_distance > GAP)
       {
@@ -113,7 +115,7 @@ int main (int argc, char *argv[]) {
       meshes[i].translate(Eigen::Vector3d(start, start, start));
 
 
-   cout <<"cube_size: " << cube_size << " occupied cube size:" << real_cube_size << endl;
+   cout <<"cube_size: " << cube_size << " occupied cube size: " << real_cube_size << endl;
 
     Mesh m;
     Mesh::concatenate(meshes, meshCount, &m);
