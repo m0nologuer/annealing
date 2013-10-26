@@ -6,7 +6,7 @@
 #include "mesh.h"
 
 #define GAP 1.0
-#define PADDING 40.0f
+#define PADDING 10.0f
 #define PERCENT_TRANSLATION 0.3f
 #define PERCENT_ROTATION 0.3f
 #define ITERATIONS 10000
