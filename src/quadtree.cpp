@@ -291,7 +291,7 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& c
   for (int i = 0; i < 3; ++i)
   {
     Eigen::Vector3d close_point;
-    Eigen::Vector3d new_dist = shortestDistanceTo(other->points[i], other->points[(i+1)%3], close_point);
+    Eigen::Vector3d new_dist = -shortestDistanceTo(other->points[i], other->points[(i+1)%3], close_point);
     if (new_dist.norm() < distance.norm())
     {
       distance = new_dist;
@@ -302,7 +302,7 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& c
   for (int i = 0; i < 3; ++i)
   {
     Eigen::Vector3d close_point;
-    Eigen::Vector3d new_dist = -other->shortestDistanceTo(points[i],points[(i+1)%3], close_point);
+    Eigen::Vector3d new_dist = other->shortestDistanceTo(points[i],points[(i+1)%3], close_point);
     if (new_dist.norm() < distance.norm())
     {
       distance = new_dist;
