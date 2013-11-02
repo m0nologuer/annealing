@@ -8,7 +8,7 @@
 #define GAP 1.0
 #define PADDING 10.0f
 #define PERCENT_TRANSLATION 0.3f
-#define PERCENT_ROTATION 0.3f
+#define PERCENT_ROTATION 0.4f
 #define ITERATIONS 10000
 #define SPACING 5
 #define CUBE_SHRINKAGE_RATE 0.04
@@ -61,37 +61,75 @@ int main (int argc, char *argv[]) {
     still_moving = false;
 
     for (int i = 0; i < meshCount; ++i)
-    {
-      meshes[i].update();
-      
+    {      
       //find closest distance
       Eigen::Vector3d vector_to_closest_object = meshes[i].smallestVectorToCube(cube_size);
       double closest_distance = vector_to_closest_object.norm();
 
+      int closest_mesh = i;
       for (int j = 0; j < meshCount; ++j)
         if (i != j)
+        {
           meshes[i].updateMinDistance(&meshes[j], cube_size, closest_distance, vector_to_closest_object);
+          closest_mesh = j;
+        }
 
       closest_distance = vector_to_closest_object.norm();
 
-//       meshes[i].move(vector_to_closest_object);
+      //find closest distance from other object
+      Eigen::Vector3d vector_to_closest_object2 = meshes[closest_mesh].smallestVectorToCube(cube_size);
+      for (int j = 0; j < meshCount; ++j)
+        if (closest_mesh != j)
+          meshes[closest_mesh].updateMinDistance(&meshes[j], cube_size, closest_distance, vector_to_closest_object2);
 
-      //rotate and translate
-      double translation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_TRANSLATION;
-      double rotation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_ROTATION;
+        
+      //translation step
+      double translation_distance = (max(min(closest_distance,vector_to_closest_object2.norm()),GAP)- GAP)*PERCENT_TRANSLATION;
+      Eigen::Vector3d movement_direction = vector_to_closest_object.normalized();
+      double total_mass = meshes[i].getMass() + meshes[closest_mesh].getMass();
+      meshes[i].translate(-movement_direction*translation_distance*meshes[i].getMass()/total_mass);
+      meshes[closest_mesh].translate(movement_direction*translation_distance*meshes[closest_mesh].getMass()/total_mass);
 
-      cout << i << " " << closest_distance <<  " trans:" << translation_distance << " rotat:" << rotation_distance << endl;
+
+
+//////////
+      //find closest distance
+       vector_to_closest_object = meshes[i].smallestVectorToCube(cube_size);
+       closest_distance = vector_to_closest_object.norm();
+
+       closest_mesh = i;
+      for (int j = 0; j < meshCount; ++j)
+        if (i != j)
+        {
+          meshes[i].updateMinDistance(&meshes[j], cube_size, closest_distance, vector_to_closest_object);
+          closest_mesh = j;
+        }
+
+      closest_distance = vector_to_closest_object.norm();
+
+      //find closest distance from other object
+       vector_to_closest_object2 = meshes[closest_mesh].smallestVectorToCube(cube_size);
+      for (int j = 0; j < meshCount; ++j)
+        if (closest_mesh != j)
+          meshes[closest_mesh].updateMinDistance(&meshes[j], cube_size, closest_distance, vector_to_closest_object2);
+
+
+//////////
+
+      //rotation distance
+      double rotation_distance = (max(min(closest_distance,vector_to_closest_object2.norm()),GAP)- GAP)*PERCENT_ROTATION;
+      meshes[i].rotateLessThan(rotation_distance*meshes[i].getMass()/total_mass,vector_to_closest_object);
+      meshes[closest_mesh].rotateLessThan(rotation_distance*meshes[closest_mesh].getMass()/total_mass,vector_to_closest_object2);
+
 
      // assert(!(closest_distance < GAP));
 
       if (closest_distance > GAP)
       {
         still_moving = true;
-        meshes[i].rotateLessThan(rotation_distance,vector_to_closest_object);
-        Eigen::Vector3d movement_direction = vector_to_closest_object.normalized();
-        meshes[i].move(-movement_direction*translation_distance);
       }      
 
+      cout << i << " " << closest_distance <<  " trans:" << translation_distance << " rotat:" << rotation_distance << endl;
     }
     
     //adjust cube

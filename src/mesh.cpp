@@ -7,8 +7,9 @@ Mesh::Mesh(){
   indexBuffer = NULL;
 
   current_center = Eigen::Vector3d(0,0,0);
-  prev_center = Eigen::Vector3d(0,0,0);
+  center_of_mass = Eigen::Vector3d(0,0,0);
   boundingSphere = 0;
+  mass = 0;
 
 }
 void Mesh::moveToOrigin(){
@@ -16,9 +17,12 @@ void Mesh::moveToOrigin(){
     return;
   double x,y,z,a,b,c;
   boundingBox(x,a,y,b,z,c);
-  move(Eigen::Vector3d(-x,-y,-z));
+  translate(Eigen::Vector3d(-x,-y,-z));
 }
-
+double Mesh::getMass()
+{
+  return mass;
+}
 void Mesh::boundingBox(double &x, double &x_max, double &y, double &y_max, double &z, double &z_max){
   if (!vertexBuffer)
     return;
@@ -82,19 +86,18 @@ void Mesh::concatenate(Mesh* meshArray, int mesh_count, Mesh* out_mesh){
 
 void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closest_object){
 
-  Eigen::Vector3d midPoint = (current_center+prev_center)*0.5;
-  Eigen::Vector3d rotation_axis = (vector_to_closest_object).cross(prev_closest_point-current_closest_point);
+  Eigen::Vector3d rotation_axis = (vector_to_closest_object).cross(center_of_mass-current_closest_point);
 
   if (rotation_axis == Eigen::Vector3d(0,0,0))
     return;
   else
     rotation_axis.normalize();
 
-  double max_distance_to_midpoint = (current_center-midPoint).norm() + boundingSphere*2;
+  double max_distance_to_midpoint = center_of_mass.norm() + boundingSphere*2;
 
   for (int i = 0; i < vertex_count; ++i)
   {
-    double distance_to_midpoint = (vertexBuffer[i]-midPoint).norm();
+    double distance_to_midpoint = (vertexBuffer[i]-center_of_mass).norm();
     if (distance_to_midpoint > max_distance_to_midpoint)
     {
       max_distance_to_midpoint = distance_to_midpoint;
@@ -106,7 +109,7 @@ void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closes
   if (angle == angle){
     for (int i = 0; i < vertex_count; ++i)
     {
-      Eigen::Vector3d rotated_point = Eigen::AngleAxisd(angle, rotation_axis)*(vertexBuffer[i]-midPoint)+midPoint;
+      Eigen::Vector3d rotated_point = Eigen::AngleAxisd(angle, rotation_axis)*(vertexBuffer[i]-center_of_mass)+center_of_mass;
       //assert((rotated_point-vertexBuffer[i]).norm() < max_rotation);
       vertexBuffer[i] = rotated_point;
     }
@@ -124,21 +127,13 @@ void Mesh::rotate(Eigen::Matrix3d rotation, Eigen::Vector3d about)
 
 void Mesh::translate(Eigen::Vector3d translation)
 {
-  prev_center += translation;
+  center_of_mass += translation;
   current_center+= translation;
 
   for (int i = 0; i < vertex_count; ++i)
     vertexBuffer[i] += translation;
 }
 
-void Mesh::move(Eigen::Vector3d translation)
-{
-  prev_center = current_center;
-  current_center+= translation;
-
-  for (int i = 0; i < vertex_count; ++i)
-    vertexBuffer[i] += translation;
-}
 void Mesh::buildQuadtree(QuadtreeNode** out_tree, double cube_size, std::vector<Triangle*>& vertex_list){
   for (int i = 0; i < face_count; ++i)
   {
@@ -148,11 +143,6 @@ void Mesh::buildQuadtree(QuadtreeNode** out_tree, double cube_size, std::vector<
 
   *out_tree = new QuadtreeNode(vertex_list, Eigen::Vector3d(0,0,0), Eigen::Vector3d(cube_size, cube_size, cube_size));
 
-}
-
-void Mesh::update()
-{
-  prev_closest_point = current_closest_point;
 }
 
 void Mesh::updateMinDistance(Mesh* secondMesh, double cube_size, double& distance, Eigen::Vector3d& vector_to_closest_object){
@@ -407,15 +397,29 @@ void Mesh::meshFromFile(char* filename, Mesh* out_mesh){
   out_mesh->boundingBox(x,a,y,b,z,c);
 
   out_mesh->current_center = (Eigen::Vector3d(x,y,z)+Eigen::Vector3d(a,b,c))*0.5;
-  out_mesh->prev_center = Eigen::Vector3d(0,0,-1) + out_mesh->current_center;
-  out_mesh->boundingSphere = (out_mesh->current_center-Eigen::Vector3d(x,y,z)).norm();
 
   out_mesh->current_closest_point = out_mesh->vertexBuffer[0];
-  out_mesh->prev_closest_point = out_mesh->vertexBuffer[0];
+  out_mesh->center_of_mass = out_mesh->current_center;
+
+  out_mesh->calculateMass();
 
 /////////////////////////////////////////////////////////
 }
-
+void Mesh::calculateMass(){
+  Eigen::Vector3d normal(0,0,1);
+  mass = 0;
+  for (int i = 0; i < face_count; ++i)
+  {
+    Eigen::Vector3d a = vertexBuffer[indexBuffer[3*i]-1];
+    Eigen::Vector3d b = vertexBuffer[indexBuffer[3*i+1]-1];
+    Eigen::Vector3d c = vertexBuffer[indexBuffer[3*i+2]-1];
+    
+    Eigen::Vector3d centroid = (a+b+c)/3;
+    double surfaceArea = ((a-b).cross(b-c)).norm()*0.5;
+    mass += centroid.dot(normal)*surfaceArea;
+  }
+   
+}
 
 void Mesh::write(char* out_file){
   ofstream stream(out_file);
