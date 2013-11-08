@@ -93,7 +93,7 @@ void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closes
   else
     rotation_axis.normalize();
 
-  double max_distance_to_midpoint = center_of_mass.norm() + boundingSphere*2;
+  double max_distance_to_midpoint = (center_of_mass - current_center).norm() + boundingSphere*2;
 
   for (int i = 0; i < vertex_count; ++i)
   {

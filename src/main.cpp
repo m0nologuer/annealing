@@ -7,11 +7,11 @@
 
 #define GAP 1.0
 #define PADDING 10.0f
-#define PERCENT_TRANSLATION 0.3f
-#define PERCENT_ROTATION 0.4f
+#define PERCENT_TRANSLATION 0.4f
+#define PERCENT_ROTATION 0.6f
 #define ITERATIONS 10000
 #define SPACING 5
-#define CUBE_SHRINKAGE_RATE 0.04
+#define CUBE_SHRINKAGE_RATE 0.1
 #define CONST_PI 3.14
 
 using namespace std;
@@ -85,10 +85,16 @@ int main (int argc, char *argv[]) {
         
       //translation step
       double translation_distance = (max(min(closest_distance,vector_to_closest_object2.norm()),GAP)- GAP)*PERCENT_TRANSLATION;
+      if (i ==closest_mesh)
+        translation_distance *= 0.5;
+
       Eigen::Vector3d movement_direction = vector_to_closest_object.normalized();
       double total_mass = meshes[i].getMass() + meshes[closest_mesh].getMass();
       meshes[i].translate(-movement_direction*translation_distance*meshes[i].getMass()/total_mass);
-      meshes[closest_mesh].translate(movement_direction*translation_distance*meshes[closest_mesh].getMass()/total_mass);
+      if (i!=closest_mesh)
+        meshes[closest_mesh].translate(movement_direction*translation_distance*meshes[closest_mesh].getMass()/total_mass);
+      else
+        meshes[i].translate(-movement_direction*translation_distance*meshes[closest_mesh].getMass()/total_mass);
 
 
 
@@ -117,10 +123,13 @@ int main (int argc, char *argv[]) {
 //////////
 
       //rotation distance
+      total_mass = meshes[i].getMass() + meshes[closest_mesh].getMass();
       double rotation_distance = (max(min(closest_distance,vector_to_closest_object2.norm()),GAP)- GAP)*PERCENT_ROTATION;
       meshes[i].rotateLessThan(rotation_distance*meshes[i].getMass()/total_mass,vector_to_closest_object);
-      meshes[closest_mesh].rotateLessThan(rotation_distance*meshes[closest_mesh].getMass()/total_mass,vector_to_closest_object2);
-
+      if (i!=closest_mesh)
+        meshes[closest_mesh].rotateLessThan(-rotation_distance*meshes[closest_mesh].getMass()/total_mass,vector_to_closest_object2);
+      else
+        meshes[i].rotateLessThan(rotation_distance*meshes[i].getMass()/total_mass,vector_to_closest_object);
 
      // assert(!(closest_distance < GAP));
 
@@ -128,7 +137,7 @@ int main (int argc, char *argv[]) {
       {
         still_moving = true;
       }      
-
+      cout << meshes[i].getMass()/total_mass << endl;
       cout << i << " " << closest_distance <<  " trans:" << translation_distance << " rotat:" << rotation_distance << endl;
     }
     
