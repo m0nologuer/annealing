@@ -83,7 +83,7 @@ int main (int argc, char *argv[]) {
 
       cout << i << " " << closest_distance <<  " trans:" << translation_distance << " rotat:" << rotation_distance << endl;
 
-     // assert(!(closest_distance < GAP));
+      assert(!(closest_distance < GAP));
 
       if (closest_distance > GAP)
       {
