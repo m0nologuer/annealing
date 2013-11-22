@@ -11,7 +11,7 @@
 #define PERCENT_ROTATION 0.3f
 #define ITERATIONS 10000
 #define SPACING 5
-#define CUBE_SHRINKAGE_RATE 0.04
+#define CUBE_SHRINKAGE_RATE 0.1
 #define CONST_PI 3.14
 
 using namespace std;
@@ -75,15 +75,13 @@ int main (int argc, char *argv[]) {
 
       closest_distance = vector_to_closest_object.norm();
 
-//       meshes[i].move(vector_to_closest_object);
-
       //rotate and translate
       double translation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_TRANSLATION;
       double rotation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_ROTATION;
 
       cout << i << " " << closest_distance <<  " trans:" << translation_distance << " rotat:" << rotation_distance << endl;
 
-      assert(!(closest_distance < GAP));
+      assert(closest_distance > GAP);
 
       if (closest_distance > GAP)
       {
