@@ -5,7 +5,7 @@
 #include <string>
 #include "mesh.h"
 
-#define GAP 0.04
+#define GAP 0.5
 #define PADDING 10.0f
 #define PERCENT_TRANSLATION 0.3f
 #define PERCENT_ROTATION 0.3f
