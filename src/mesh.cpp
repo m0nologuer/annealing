@@ -157,7 +157,7 @@ void Mesh::update()
 
 void Mesh::updateMinDistance(Mesh* secondMesh, double cube_size, double& distance, Eigen::Vector3d& vector_to_closest_object){
 
-/*
+
   std::vector<Triangle*> temp_list_1,temp_list_2;
   
   QuadtreeNode* tree1; QuadtreeNode* tree2;
@@ -173,9 +173,9 @@ void Mesh::updateMinDistance(Mesh* secondMesh, double cube_size, double& distanc
 
   delete tree1;
   delete tree2;
-  */
   
-
+  
+/*
   std::vector<Triangle*> vertex_list;
   for (int i = 0; i < face_count; ++i)
   {
@@ -211,7 +211,7 @@ void Mesh::updateMinDistance(Mesh* secondMesh, double cube_size, double& distanc
 
   for (int i = 0; i < vertex_list_2.size(); ++i)
     delete[] vertex_list_2[i];
-/*
+
    double dist_squared = distance* distance;
 
   for (int i = 0; i < vertex_count; ++i)

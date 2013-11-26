@@ -5,13 +5,13 @@
 #include <string>
 #include "mesh.h"
 
-#define GAP 0.05
+#define GAP 0.1
 #define PADDING 10.0f
 #define PERCENT_TRANSLATION 0.3f
 #define PERCENT_ROTATION 0.3f
 #define ITERATIONS 10000
 #define SPACING 5
-#define CUBE_SHRINKAGE_RATE 0.1
+#define CUBE_SHRINKAGE_RATE 0.04
 #define CONST_PI 3.14
 
 using namespace std;

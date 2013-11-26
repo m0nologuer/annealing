@@ -11,7 +11,7 @@
 using namespace std; 
 
 #define max_triangles_per_leaf 30
-#define BIG_DOUBLE 1000000.0
+#define BIG_DOUBLE 1e12
 
 class Triangle
 {

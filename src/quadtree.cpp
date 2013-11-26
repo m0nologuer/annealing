@@ -1,5 +1,5 @@
 #include "quadtree.h"
-#define EPISILON 1e-13
+#define EPISILON 1e-14
 
 int QuadtreeNode::comparison_index(Eigen::Vector3d vertex, Eigen::Vector3d medium)
 {
@@ -42,8 +42,8 @@ double boundingBoxDistance(Eigen::Vector3d min1, Eigen::Vector3d min2, Eigen::Ve
 }
 void QuadtreeNode::updateShortestDistanceTo(QuadtreeNode * tree2, Eigen::Vector3d& min_vector, Eigen::Vector3d& closest_point){
   
-  //if (boundingBoxDistance(bounding_box_min, tree2->bounding_box_min, bounding_box_max, tree2->bounding_box_max) > min_vector.norm())
-    //return;
+  if (boundingBoxDistance(bounding_box_min, tree2->bounding_box_min, bounding_box_max, tree2->bounding_box_max) > min_vector.norm())
+    return;
 
     if (leaf)
     {
