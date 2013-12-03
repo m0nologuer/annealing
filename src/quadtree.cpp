@@ -226,40 +226,48 @@ Eigen::Vector3d Triangle::shortestDistanceTo(Eigen::Vector3d point){
   double dot12 = v1.dot(v2);
 
 // Compute barycentric coordinates
-  double invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-  double u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-  double v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+  double denom = (dot00 * dot11 - dot01 * dot01);
+  double u = (dot11 * dot02 - dot01 * dot12) ;
+  double v = (dot00 * dot12 - dot01 * dot02) ;
 
   //project point onto all three edges
-  double edge1 = (point-points[0]).dot(points[1]-points[0])/(points[1]-points[0]).squaredNorm();
-  double edge2 = (point-points[1]).dot(points[2]-points[1])/(points[2]-points[1]).squaredNorm();
+  double edge1 = (point-points[0]).dot(points[1]-points[0]); 
+  double edge1_denom = (points[1]-points[0]).squaredNorm();
+  double edge2 = (point-points[1]).dot(points[2]-points[1]);
+  double edge2_denom = (points[2]-points[1]).squaredNorm();
   double edge3 = (point-points[2]).dot(points[0]-points[2])/(points[0]-points[2]).squaredNorm();
-
+  double edge3_denom = (points[2]-points[0]).squaredNorm();
 
   // Check if projected point is in triangle
-  if  ((u > -EPISILON) && (v > -EPISILON) && (u + v < 1+ EPISILON))
+  if  ((u > 0) && (v > 0) && (u + v < denom))
   {
-    Eigen::Vector3d closest_point = points[0] + u * (points[1] - points[0]) + v * (points[2]-points[0]);
+    u = u/denom;
+    v = v/denom;
+    Eigen::Vector3d closest_point = points[0] + v * (points[1] - points[0]) + u * (points[2]-points[0]);
+
     update_shortest_distance((closest_point - point), distance);
   }
-  if (edge1 > -EPISILON && edge1 < (1+EPISILON))
+  if (edge1 > 0 && edge1 < edge1_denom)
   {
+    edge1 = edge1/edge1_denom;
     Eigen::Vector3d closest_point = edge1*points[1] + (1- edge1)*points[0];
     update_shortest_distance((closest_point - point), distance);
   }
-  if (edge2 > -EPISILON && edge2 < (1+EPISILON))
+  if (edge2 > 0 && edge2 < edge2_denom)
   {
+    edge2 = edge2/edge2_denom;
     Eigen::Vector3d closest_point = edge2*points[2] + (1- edge2)*points[1];
     update_shortest_distance((closest_point - point), distance);
   }
-  if (edge3 > -EPISILON && edge3 < (1+EPISILON))
+  if (edge3 > 0 && edge3 < edge3_denom)
   {
+    edge3 = edge3/edge3_denom;
     Eigen::Vector3d closest_point = edge3*points[0] + (1- edge3)*points[2];
     update_shortest_distance((closest_point - point), distance);
   }
   
   return distance;
-}*/
+}
 Eigen::Vector3d Triangle::shortestDistanceTo(Triangle* other, Eigen::Vector3d& closest_point){
 
   Eigen::Vector3d distance = shortestDistanceTo(other->points[0]);
