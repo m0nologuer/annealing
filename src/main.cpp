@@ -5,13 +5,13 @@
 #include <string>
 #include "mesh.h"
 
-#define GAP 0.1
+#define GAP 1.0
 #define PADDING 5.0f
-#define PERCENT_TRANSLATION 0.3f
-#define PERCENT_ROTATION 0.3f
+#define PERCENT_TRANSLATION 0.2f
+#define PERCENT_ROTATION 0.2f
 #define ITERATIONS 10000
 #define SPACING 5
-#define CUBE_SHRINKAGE_RATE 0.08
+#define CUBE_SHRINKAGE_RATE 0.1
 #define CONST_PI 3.14
 
 using namespace std;
@@ -55,13 +55,14 @@ int main (int argc, char *argv[]) {
   double cube_size = max(x_coord*cube_count+2.0f*(PADDING+GAP*2), max(y_coord*cube_count+2.0f*(PADDING+GAP*2), z_coord*cube_count+PADDING*3));
   int counter = 0;
   bool still_moving = false;
+  double pseudo_GAP = SPACING;
 
   do
   {
     still_moving = false;
 
     for (int i = 0; i < meshCount; ++i)
-      for (int k = 0; k < 5; ++k)
+      for (int k = 0; k < 9; ++k)
     {
       meshes[i].update();
       
@@ -73,8 +74,6 @@ int main (int argc, char *argv[]) {
         if (i != j)
           meshes[i].updateMinDistance(&meshes[j], cube_size, closest_distance, vector_to_closest_object);
 
-  //      meshes[i].move(vector_to_closest_object);
-
 
       closest_distance = vector_to_closest_object.norm();
 
@@ -83,6 +82,7 @@ int main (int argc, char *argv[]) {
       double rotation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_ROTATION;
 
       cout << i << " " << closest_distance <<  " trans:" << translation_distance << " rotat:" << rotation_distance << endl;
+
 
       assert(closest_distance > GAP);
 
