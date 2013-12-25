@@ -7,8 +7,8 @@
 
 #define GAP 1.0
 #define PADDING 5.0f
-#define PERCENT_TRANSLATION 0.2f
-#define PERCENT_ROTATION 0.2f
+#define PERCENT_TRANSLATION 0.5f
+#define PERCENT_ROTATION 0.5f
 #define ITERATIONS 10000
 #define SPACING 5
 #define CUBE_SHRINKAGE_RATE 0.1
@@ -62,7 +62,7 @@ int main (int argc, char *argv[]) {
     still_moving = false;
 
     for (int i = 0; i < meshCount; ++i)
-      for (int k = 0; k < 9; ++k)
+      for (int k = 0; k < 5; ++k)
     {
       meshes[i].update();
       

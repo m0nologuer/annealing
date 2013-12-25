@@ -82,17 +82,22 @@ void Mesh::concatenate(Mesh* meshArray, int mesh_count, Mesh* out_mesh){
 
 void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closest_object){
 
+
   Eigen::Vector3d midPoint = (current_center+prev_center)*0.5;
 
   Eigen::Vector3d random = Eigen::Vector3d(rand()%100,rand()%100,rand()%100);
   Eigen::Vector3d rotation_axis = (vector_to_closest_object).cross(random);
 
-  if (rotation_axis == Eigen::Vector3d(0,0,0))
+/* 
+
+  Eigen::Vector3d rotation_axis = (vector_to_closest_object).cross(vector_to_closest_object);
+
+ if (rotation_axis == Eigen::Vector3d(0,0,0))
     return;
   else
     rotation_axis.normalize();
 
-/*
+
   double max_distance_to_midpoint = (current_center-midPoint).norm() + boundingSphere*2;
 
   for (int i = 0; i < vertex_count; ++i)
@@ -115,13 +120,31 @@ void Mesh::rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closes
     }
 
   }
-*/
-    double max_distance_to_midpoint = vector_to_closest_object.norm() + boundingSphere*2;
-
-    double angle = asin(max_rotation/(2*max_distance_to_midpoint))*2;
-
-    rotate(Eigen::AngleAxisd(angle, rotation_axis)*Eigen::Scaling(1.0), current_center +  vector_to_closest_object);
 //    rotate(Eigen::AngleAxisd(-angle, rotation_axis)*Eigen::Scaling(1.0), midPoint);
+
+*/
+  
+  Eigen::Vector3d rotation_center = current_center +  vector_to_closest_object;
+  double max_distance_to_midpoint = vector_to_closest_object.norm() + boundingSphere*2;
+
+  for (int i = 0; i < vertex_count; ++i)
+  {
+    double distance_to_midpoint = (vertexBuffer[i]-rotation_center).norm();
+    if (distance_to_midpoint > max_distance_to_midpoint)
+      max_distance_to_midpoint = distance_to_midpoint;
+  }
+
+  double angle = asin(max_rotation/(2*max_distance_to_midpoint))*2;
+
+  if (angle == angle){
+    for (int i = 0; i < vertex_count; ++i)
+    {
+      Eigen::Vector3d rotated_point = Eigen::AngleAxisd(angle, rotation_axis)*(vertexBuffer[i]-rotation_center)+rotation_center;
+      //assert((rotated_point-vertexBuffer[i]).norm() < max_rotation);
+      vertexBuffer[i] = rotated_point;
+    }
+
+  }
 
 }
 void Mesh::rotate(Eigen::Matrix3d rotation, Eigen::Vector3d about)
