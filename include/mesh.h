@@ -20,6 +20,8 @@ public:
   Mesh();
   ~Mesh();
 
+  Eigen::Vector3d get_current_center();
+
   void moveToOrigin();
   void update();
   void boundingBox(double &x, double &x_max, double &y, double &y_max, double &z, double &z_max);
@@ -30,7 +32,7 @@ public:
 
   void buildQuadtree(QuadtreeNode** out_tree, double cube_size, std::vector<Triangle*>& vertex_list);
   void updateMinDistance(Mesh* secondMesh, double cube_size, double& distance, Eigen::Vector3d& vector_to_closest_object);
-  void rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closest_object);
+  Eigen::Matrix3d rotateLessThan(double max_rotation, Eigen::Vector3d& vector_to_closest_object);
   Eigen::Vector3d smallestVectorToCube(double cube_size);
 
   void write(char* out_obj_file);

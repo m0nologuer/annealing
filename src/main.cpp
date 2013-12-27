@@ -7,8 +7,8 @@
 
 #define GAP 1.0
 #define PADDING 5.0f
-#define PERCENT_TRANSLATION 0.5f
-#define PERCENT_ROTATION 0.5f
+#define PERCENT_TRANSLATION 0.2f
+#define PERCENT_ROTATION 0.99f
 #define ITERATIONS 10000
 #define SPACING 5
 #define CUBE_SHRINKAGE_RATE 0.1
@@ -62,7 +62,7 @@ int main (int argc, char *argv[]) {
     still_moving = false;
 
     for (int i = 0; i < meshCount; ++i)
-      for (int k = 0; k < 5; ++k)
+      for(int k = 0; k < 5; k++)
     {
       meshes[i].update();
       
@@ -90,9 +90,12 @@ int main (int argc, char *argv[]) {
       if (closest_distance > GAP)
       {
         still_moving = true;
-        meshes[i].rotateLessThan(rotation_distance,vector_to_closest_object);
-        Eigen::Vector3d movement_direction = vector_to_closest_object.normalized();
-        meshes[i].move(-movement_direction*translation_distance);
+        
+        //move it
+        if (k >2)
+          meshes[i].rotateLessThan(rotation_distance,vector_to_closest_object);
+        else
+          meshes[i].move(-vector_to_closest_object.normalized()*translation_distance);
       }      
 
     }
