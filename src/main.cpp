@@ -6,7 +6,7 @@
 #include "mesh.h"
 
 #define GAP 1.0
-#define PADDING 10.0f
+#define PADDING 5.0f
 #define PERCENT_TRANSLATION 0.4f
 #define PERCENT_ROTATION 0.6f
 #define ITERATIONS 10000
@@ -61,6 +61,7 @@ int main (int argc, char *argv[]) {
     still_moving = false;
 
     for (int i = 0; i < meshCount; ++i)
+      for (int turn = 0; turn < 6; turn++)
     {      
       //find closest distance
       Eigen::Vector3d vector_to_closest_object = meshes[i].smallestVectorToCube(cube_size);
@@ -76,11 +77,16 @@ int main (int argc, char *argv[]) {
 
       closest_distance = vector_to_closest_object.norm();
 
+      double total_mass = meshes[i].getMass() + meshes[closest_mesh].getMass();
+
       //find closest distance from other object
       Eigen::Vector3d vector_to_closest_object2 = meshes[closest_mesh].smallestVectorToCube(cube_size);
       for (int j = 0; j < meshCount; ++j)
         if (closest_mesh != j)
           meshes[closest_mesh].updateMinDistance(&meshes[j], cube_size, closest_distance, vector_to_closest_object2);
+
+      if (turn < 3)
+      {
 
         
       //translation step
@@ -89,7 +95,6 @@ int main (int argc, char *argv[]) {
         translation_distance *= 0.5;
 
       Eigen::Vector3d movement_direction = vector_to_closest_object.normalized();
-      double total_mass = meshes[i].getMass() + meshes[closest_mesh].getMass();
       meshes[i].translate(-movement_direction*translation_distance*meshes[i].getMass()/total_mass);
       if (i!=closest_mesh)
         meshes[closest_mesh].translate(movement_direction*translation_distance*meshes[closest_mesh].getMass()/total_mass);
@@ -118,10 +123,12 @@ int main (int argc, char *argv[]) {
       for (int j = 0; j < meshCount; ++j)
         if (closest_mesh != j)
           meshes[closest_mesh].updateMinDistance(&meshes[j], cube_size, closest_distance, vector_to_closest_object2);
-
+      }
 
 //////////
 
+      else
+      {
       //rotation distance
       total_mass = meshes[i].getMass() + meshes[closest_mesh].getMass();
       double rotation_distance = (max(min(closest_distance,vector_to_closest_object2.norm()),GAP)- GAP)*PERCENT_ROTATION;
@@ -132,14 +139,14 @@ int main (int argc, char *argv[]) {
         meshes[i].rotateLessThan(rotation_distance*meshes[i].getMass()/total_mass,vector_to_closest_object);
 
      // assert(!(closest_distance < GAP));
-
+      }  
       if (closest_distance > GAP)
       {
         still_moving = true;
       }      
       cout << meshes[i].getMass()/total_mass << endl;
-      cout << i << " " << closest_distance <<  " trans:" << translation_distance << " rotat:" << rotation_distance << endl;
-    }
+      cout << i << " min distance:" << closest_distance ;   
+       }
     
     //adjust cube
     
