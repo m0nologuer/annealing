@@ -7,7 +7,7 @@
 
 #define GAP 1.0
 #define PADDING 5.0f
-#define PERCENT_TRANSLATION 0.2f
+#define PERCENT_TRANSLATION 0.0f
 #define PERCENT_ROTATION 0.99f
 #define ITERATIONS 10000
 #define SPACING 5
