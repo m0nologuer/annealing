@@ -62,7 +62,7 @@ int main (int argc, char *argv[]) {
     still_moving = false;
 
     for (int i = 0; i < meshCount; ++i)
-      for(int k = 0; k < 5; k++)
+      for(int k = 0; k < 6; k++)
     {
       meshes[i].update();
       
@@ -81,8 +81,6 @@ int main (int argc, char *argv[]) {
       double translation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_TRANSLATION;
       double rotation_distance = (max(closest_distance,GAP)- GAP)*PERCENT_ROTATION;
 
-      cout << i << " " << closest_distance <<  " trans:" << translation_distance << " rotat:" << rotation_distance << endl;
-
 
       assert(closest_distance > GAP);
 
@@ -93,9 +91,16 @@ int main (int argc, char *argv[]) {
         
         //move it
         if (k >2)
+        {
           meshes[i].rotateLessThan(rotation_distance,vector_to_closest_object);
+          cout << i << " " << closest_distance  << " rotat:" << rotation_distance << endl;
+
+        }
         else
+        {
           meshes[i].move(-vector_to_closest_object.normalized()*translation_distance);
+          cout << i << " " << closest_distance <<  " trans:" << translation_distance << endl;
+        }
       }      
 
     }
