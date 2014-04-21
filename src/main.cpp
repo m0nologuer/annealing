@@ -6,12 +6,12 @@
 #include "mesh.h"
 
 #define GAP 1.0
-#define PADDING 5.0f
-#define PERCENT_TRANSLATION 0.4f
-#define PERCENT_ROTATION 0.6f
+#define PADDING 2.0f
+#define PERCENT_TRANSLATION 0.1f
+#define PERCENT_ROTATION 0.3f
 #define ITERATIONS 10000
 #define SPACING 5
-#define CUBE_SHRINKAGE_RATE 0.01
+#define CUBE_SHRINKAGE_RATE 0.04
 #define CONST_PI 3.14
 
 using namespace std;
@@ -86,10 +86,12 @@ int main (int argc, char *argv[]) {
           meshes[closest_mesh].updateMinDistance(&meshes[j], cube_size, closest_distance, vector_to_closest_object2);
 
 
-      if (turn < 3)
+     if (turn < 3)
         {
+          
         //translation step
         double translation_distance = (max(min(closest_distance,vector_to_closest_object2.norm()),GAP)- GAP)*PERCENT_TRANSLATION;
+      //  double translation_distance = (closest_distance-GAP)*PERCENT_TRANSLATION;
         if (i ==closest_mesh)
           translation_distance *= 0.5;
 
@@ -98,7 +100,7 @@ int main (int argc, char *argv[]) {
         if (i!=closest_mesh)
           meshes[closest_mesh].translate(movement_direction*translation_distance*meshes[closest_mesh].getMass()/total_mass);
         else
-          meshes[i].translate(-movement_direction*translation_distance*meshes[closest_mesh].getMass()/total_mass);
+          meshes[i].translate(movement_direction*translation_distance*meshes[closest_mesh].getMass()/total_mass);
 
          cout << i << " translation_distance:" << translation_distance << endl ;   
       }
@@ -107,9 +109,11 @@ int main (int argc, char *argv[]) {
 
       else
       {
-        //rotation distance
+        
+        //rotation distance + - +
         total_mass = meshes[i].getMass() + meshes[closest_mesh].getMass();
         double rotation_distance = (max(min(closest_distance,vector_to_closest_object2.norm()),GAP)- GAP)*PERCENT_ROTATION;
+
         meshes[i].rotateLessThan(rotation_distance*meshes[i].getMass()/total_mass,vector_to_closest_object);
         if (i!=closest_mesh)
           meshes[closest_mesh].rotateLessThan(-rotation_distance*meshes[closest_mesh].getMass()/total_mass,vector_to_closest_object2);
